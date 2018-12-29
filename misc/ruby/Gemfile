@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+gem 'bacon'
+gem 'sequel'
+gem 'sqlite3'
+
+#gem 'rake'
+#gem 'cairo'
+#gem 'gtk2'

@@ -1,0 +1,12 @@
+*.exe
+*.swo
+*.swp
+*.tar.gz
+*.zip
+.bundle/**
+.tcl-*-done
+.tk-*-done
+Gemfile.lock
+doc/**
+vendor/**
+work.*/**
