@@ -1,7 +1,7 @@
 package require http
 package require platform
 
-set HERE [file dirname $argv0]
+set HERE [file normalize [file dirname $argv0]]
 set IMG_DIR [file join ${HERE} "img"]
 set APP_NAME "Rite Club Companion"
 
