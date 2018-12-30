@@ -13,7 +13,7 @@ set APP_NAME "Rite Club Companion"
 set PYRE_LOCATION "(unset)"
 set PYRE_VERSION "(unknown version)"
 
-set fp [open "${HERE}/VERSION"]
+set fp [open "${HERE}/VERSION" r]
 set VERSION [string trim [gets $fp]]
 close $fp
 
@@ -134,3 +134,12 @@ grid .pyre_version -row 4 -column 1 -sticky news
 
 # === STARTUP COMMANDS ===
 ping_database_server
+
+# There isn't a readymade 'stringio' class, so its just easier to read/write
+# to/from a file >:|
+#
+# XXX This works, just needs to be prettified
+#set fp [open "/Users/charlotte/devel/rite-club-web/testdata/rite01.json" r]
+#set token [::http::geturl "http://localhost:9292/api/v1/rites" -method POST -type application/json -querychannel $fp]
+#close $fp
+#::http::cleanup $token
