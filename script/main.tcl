@@ -1,6 +1,11 @@
+#
+# Rite Club Companion main GUI
+#
+
 package require http
 package require platform
 
+# === GLOBALS ===
 set HERE [file normalize [file dirname $argv0]]
 set IMG_DIR [file join ${HERE} "img"]
 set APP_NAME "Rite Club Companion"
@@ -14,12 +19,11 @@ close $fp
 
 image create photo pyre_logo -file "${IMG_DIR}/pyre.png"
 
+# === MAIN WINDOW SETUP ===
 wm title . ${APP_NAME}
 wm iconphoto . -default pyre_logo
 wm geometry . "=800x600"
 wm resizable . true true
-
-#########
 
 ttk::label .title_label_img -image pyre_logo
 
@@ -82,6 +86,21 @@ proc ping_database_server {} {
   }
 }
 
+
+# === MENU BAR ===
+menu .menubar
+menu .menubar.aaa -tearoff false
+menu .menubar.aaa.option1 -tearoff false
+menu .menubar.bbb -tearoff false
+menu .menubar.ccc -tearoff false
+.menubar add cascade -label "Whatever" -menu .menubar.aaa
+.menubar.aaa add cascade -label "option1" -menu .menubar.aaa.option1
+.menubar add cascade -label "Blah" -menu .menubar.bbb
+.menubar add cascade -label "Example" -menu .menubar.ccc
+. configure -menu .menubar
+
+
+# === XXX ===
 ttk::button .button1 -text "click me" -command show_about_window
 
 proc set_pyre_location {} {
@@ -102,8 +121,8 @@ ttk::label .pyre_location_label -text "Pyre location:"
 ttk::label .pyre_location -textvariable PYRE_LOCATION
 ttk::label .pyre_version -textvariable PYRE_VERSION
 
-#########
 
+# === WIDGET LAYOUT ===
 pack .title_label_img
 pack .button1
 pack .choose_pyre_button
@@ -111,6 +130,6 @@ pack .pyre_location_label
 pack .pyre_location
 pack .pyre_version
 
-#########
 
+# === STARTUP COMMANDS ===
 ping_database_server
