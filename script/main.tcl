@@ -1,3 +1,4 @@
+package require http
 package require platform
 
 set HERE [file dirname $argv0]
@@ -70,6 +71,18 @@ proc get_pyre_version {} {
   }
 }
 
+proc ping_database_server {} {
+  set token [::http::geturl "http://noxalas.net" -validate true]
+  set status_code [::http::ncode ${token}]
+  ::http::cleanup ${token}
+  if { ${status_code} == 200 } {
+    puts "PING OK"
+  } else  {
+    # XXX is an error
+    puts "COULDN'T PING!"
+  }
+}
+
 ttk::button .button1 -text "click me" -command show_about_window
 
 proc set_pyre_location {} {
@@ -98,3 +111,7 @@ pack .choose_pyre_button
 pack .pyre_location_label
 pack .pyre_location
 pack .pyre_version
+
+#########
+
+ping_database_server
