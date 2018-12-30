@@ -17,6 +17,10 @@ TK_SOURCE_TARBALL=	$(distdir)/$(notdir $(TK_SOURCE_URL))
 
 MINGW_TRIPLE?=	x86_64-w64-mingw32
 
+# Turns out both the Tcl and Tk tarballs require GNU tar to extract. You
+# might need add "TAR=gtar" to your command line.
+TAR?=	tar
+
 ifndef PLATFORM
 ifeq ($(shell uname -s),Darwin)
 PLATFORM?=	macosx
@@ -100,7 +104,7 @@ $(TK_SOURCE_TARBALL): | $(distdir)
 tcl: $(tcl_done)
 
 $(tcl_done): $(TCL_SOURCE_TARBALL) | $(workdir)
-	tar -x -f $< -C $(workdir)
+	$(TAR) -x -f $< -C $(workdir)
 	cd $(tcl_workdir) && ./configure $(tcl_configure_flags)
 	$(MAKE) -C $(tcl_workdir)
 	@touch $@
@@ -109,7 +113,7 @@ $(tcl_done): $(TCL_SOURCE_TARBALL) | $(workdir)
 tk: $(tk_done)
 
 $(tk_done): $(TK_SOURCE_TARBALL) $(tcl_done) | $(workdir)
-	tar -x -f $< -C $(workdir)
+	$(TAR) -x -f $< -C $(workdir)
 	cd $(tk_workdir) && ./configure $(tk_configure_flags)
 	$(MAKE) -C $(tk_workdir)
 	@touch $@

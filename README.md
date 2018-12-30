@@ -46,6 +46,13 @@ You can build the Windows version if you have already installed `mingw-w64` like
 $ make all PLATFORM=win
 ```
 
+You might need to set several other variables. For example, your command
+line will look like this if you're building on NetBSD:
+
+```
+$ PATH=/usr/pkg/cross/x86_64-w64-mingw32/bin:${PATH} gmake PLATFORM=win TAR=gtar all
+```
+
 [![forthebadge](https://forthebadge.com/images/badges/built-by-codebabes.svg)](https://forthebadge.com)
 
 [mingw-w64]: https://mingw-w64.org/doku.php
