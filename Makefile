@@ -88,12 +88,12 @@ fetch: $(TCL_SOURCE_TARBALL) $(TK_SOURCE_TARBALL)
 
 $(TCL_SOURCE_TARBALL): | $(distdir)
 	curl -L $(TCL_SOURCE_URL) > $@
-	cd $(distdir) && shasum -a256 -c SHASUMS
+	cd $(distdir) && shasum -a256 -c tcl.shasum
 	@touch $@
 
 $(TK_SOURCE_TARBALL): | $(distdir)
 	curl -L $(TK_SOURCE_URL) > $@
-	cd $(distdir) && shasum -a256 -c SHASUMS
+	cd $(distdir) && shasum -a256 -c tk.shasum
 	@touch $@
 
 .PHONY: tcl
