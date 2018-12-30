@@ -28,7 +28,6 @@ wm resizable . true true
 ttk::label .title_label_img -image pyre_logo
 
 proc destroy_about_window {} {
-  wm withdraw .about_window
   wm forget .about_window
 }
 
@@ -37,7 +36,7 @@ proc show_about_window {} {
   global APP_NAME
   global VERSION
 
-  toplevel .about_window
+  if [info exists .about_window] {} else { toplevel .about_window }
   wm title .about_window "About ${APP_NAME}"
   wm geometry .about_window "=300x150"
 
@@ -88,15 +87,15 @@ proc ping_database_server {} {
 
 
 # === MENU BAR ===
-menu .menubar
-menu .menubar.aaa -tearoff false
-menu .menubar.aaa.option1 -tearoff false
-menu .menubar.bbb -tearoff false
-menu .menubar.ccc -tearoff false
-.menubar add cascade -label "Whatever" -menu .menubar.aaa
-.menubar.aaa add cascade -label "option1" -menu .menubar.aaa.option1
-.menubar add cascade -label "Blah" -menu .menubar.bbb
-.menubar add cascade -label "Example" -menu .menubar.ccc
+menu .menubar -tearoff false
+menu .menubar.file -tearoff false
+menu .menubar.file.about -tearoff false
+menu .menubar.file.quit -tearoff false
+menu .menubar.xxx -tearoff false
+.menubar add cascade -label "File" -menu .menubar.file
+.menubar.file add cascade -label "About..." -menu .menubar.file.about
+.menubar.file add cascade -label "Quit" -menu .menubar.file.quit
+.menubar add cascade -label "Blah" -menu .menubar.xxx
 . configure -menu .menubar
 
 
