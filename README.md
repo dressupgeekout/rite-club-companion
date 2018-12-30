@@ -14,7 +14,17 @@ The Rite Club Companion is distributed as a statically linked version of
 libraries, and a launcher script.
 
 
-## How to build
+## Quick development
+
+If you already have Tk 8.6 installed, you can do quick development work on
+your machine just by running `wish`:
+
+```
+$ wish8.6 ./script/main.tcl
+```
+
+
+## How to build a distribution
 
 In theory, one could develop on the Rite Club Companion on any OS, but the
 author uses Unix-like systems (macOS, Linux, NetBSD) and the provided Makefile

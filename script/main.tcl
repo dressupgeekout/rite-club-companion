@@ -3,7 +3,9 @@ package require platform
 set HERE [file dirname $argv0]
 set IMG_DIR [file join ${HERE} "img"]
 set APP_NAME "Rite Club Companion"
+
 set PYRE_LOCATION "(unset)"
+set PYRE_VERSION "(unknown version)"
 
 set fp [open "${HERE}/VERSION"]
 set _version [read $fp]
@@ -42,6 +44,32 @@ proc show_about_window {} {
   pack .about_window.ok_button
 }
 
+# XXX This currently assumes the game comes from GOG.
+proc get_pyre_version {} {
+  global PYRE_LOCATION
+  global PYRE_VERSION
+
+  set gameinfo [file normalize [file join [file dirname $PYRE_LOCATION] .. gameinfo]]
+  if [file isfile $gameinfo] {
+    # The GOG 'gameinfo' file's first line should read "Pyre", and the
+    # second line will be the version number.
+    set fp [open $gameinfo r]
+    set data [read $fp]
+    close $fp
+    set lines [split $data \n]
+    set alleged_game [string trim [lindex $lines 0]]
+    set alleged_version [string trim [lindex $lines 1]]
+    if { $alleged_game != "Pyre" } {
+      puts "this is not pyre"
+      # XXX exit
+    }
+    set PYRE_VERSION ${alleged_version}
+  } else {
+    # XXX should error!
+    puts "invalid!!"
+  }
+}
+
 ttk::button .button1 -text "click me" -command show_about_window
 
 proc set_pyre_location {} {
@@ -52,12 +80,15 @@ proc set_pyre_location {} {
   } else {
     set PYRE_LOCATION [tk_getOpenFile -parent .]
   }
+
+  get_pyre_version
 }
 
-ttk::button .choose_pyre_button -text "Choose Pyre..."  -command set_pyre_location
+ttk::button .choose_pyre_button -text "Choose Pyre..." -command set_pyre_location
 
 ttk::label .pyre_location_label -text "Pyre location:"
 ttk::label .pyre_location -textvariable PYRE_LOCATION
+ttk::label .pyre_version -textvariable PYRE_VERSION
 
 #########
 
@@ -66,3 +97,4 @@ pack .button1
 pack .choose_pyre_button
 pack .pyre_location_label
 pack .pyre_location
+pack .pyre_version
