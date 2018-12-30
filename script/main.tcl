@@ -9,9 +9,8 @@ set PYRE_LOCATION "(unset)"
 set PYRE_VERSION "(unknown version)"
 
 set fp [open "${HERE}/VERSION"]
-set _version [read $fp]
+set VERSION [string trim [gets $fp]]
 close $fp
-set VERSION [string trim ${_version}]
 
 image create photo pyre_logo -file "${IMG_DIR}/pyre.png"
 
