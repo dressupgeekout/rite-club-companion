@@ -22,7 +22,7 @@ image create photo pyre_logo -file "${IMG_DIR}/pyre.png"
 # === MAIN WINDOW SETUP ===
 wm title . ${APP_NAME}
 wm iconphoto . -default pyre_logo
-wm geometry . "=800x600"
+#wm geometry . "=800x600"
 wm resizable . true true
 
 ttk::label .title_label_img -image pyre_logo
@@ -118,16 +118,18 @@ ttk::button .choose_pyre_button -text "Choose Pyre..." -command set_pyre_locatio
 
 ttk::label .pyre_location_label -text "Pyre location:"
 ttk::label .pyre_location -textvariable PYRE_LOCATION
+ttk::label .pyre_version_label -text "Pyre version:"
 ttk::label .pyre_version -textvariable PYRE_VERSION
 
 
 # === WIDGET LAYOUT ===
-pack .title_label_img
-pack .button1
-pack .choose_pyre_button
-pack .pyre_location_label
-pack .pyre_location
-pack .pyre_version
+grid .title_label_img -row 0 -column 0 -columnspan 2 -sticky news
+grid .button1 -row 1 -column 0  -sticky news
+grid .choose_pyre_button -row 2 -column 0 -sticky news
+grid .pyre_location_label -row 3 -column 0 -sticky news
+grid .pyre_location -row 3 -column 1 -sticky news
+grid .pyre_version_label -row 4 -column 0 -sticky news
+grid .pyre_version -row 4 -column 1 -sticky news
 
 
 # === STARTUP COMMANDS ===
