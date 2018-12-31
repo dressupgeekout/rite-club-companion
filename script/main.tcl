@@ -47,6 +47,21 @@ proc show_about_window {} {
   pack .about_window.ok_button
 }
 
+# Can return: "macOS", "Windows" or "Linux".
+#
+# XXX verify what [platform::generic] returns on Windows.
+proc my_platform {} {
+  set word [lindex [split [platform::generic] -] 0]
+
+  if { $word == "macosx"} {
+    return "macOS"
+  } elseif { $word == "win" } {
+    return "Windows"
+  } else {
+    return "Linux"
+  }
+}
+
 # XXX This currently assumes the game comes from GOG.
 proc get_pyre_version {} {
   global PYRE_LOCATION
@@ -71,6 +86,24 @@ proc get_pyre_version {} {
     # XXX should error!
     puts "invalid!!"
   }
+}
+
+# A user on macOS will provide the path to the .app bundle, but what we
+# really want is the actual executable Mach-O binary.
+proc pyre_real_location {} {
+  global PYRE_LOCATION
+
+  if {[my_platform] == "macOS"} {
+    return [file join $PYRE_LOCATION "Contents" "MacOS" "Pyre"]
+  } else {
+    return $PYRE_LOCATION
+  }
+}
+
+proc launch_pyre {} {
+  global PYRE_LOCATION
+  set real_location [pyre_real_location]
+  exec -ignorestderr -- ${real_location} > /tmp/whatever 2>@1 &
 }
 
 proc ping_database_server {} {
@@ -104,13 +137,7 @@ ttk::button .button1 -text "click me" -command show_about_window
 
 proc set_pyre_location {} {
   global PYRE_LOCATION
-
-  if [string match "macosx" [platform::generic]] {
-    set PYRE_LOCATION [::tk::mac::OpenApplication]
-  } else {
-    set PYRE_LOCATION [tk_getOpenFile -parent .]
-  }
-
+  set PYRE_LOCATION [tk_getOpenFile -parent .]
   get_pyre_version
 }
 
@@ -121,6 +148,8 @@ ttk::label .pyre_location -textvariable PYRE_LOCATION
 ttk::label .pyre_version_label -text "Pyre version:"
 ttk::label .pyre_version -textvariable PYRE_VERSION
 
+ttk::button .launch_pyre_button -text "Launch!" -command launch_pyre
+
 
 # === WIDGET LAYOUT ===
 grid .title_label_img -row 0 -column 0 -columnspan 2 -sticky news
@@ -130,6 +159,7 @@ grid .pyre_location_label -row 3 -column 0 -sticky news
 grid .pyre_location -row 3 -column 1 -sticky news
 grid .pyre_version_label -row 4 -column 0 -sticky news
 grid .pyre_version -row 4 -column 1 -sticky news
+grid .launch_pyre_button -row 5 -column 0 -columnspan 2 -sticky news
 
 
 # === STARTUP COMMANDS ===
