@@ -105,7 +105,7 @@ proc pyre_real_location {} {
 # 'exiles' is an array of character indexes
 #
 # XXX require a proper JSON generator
-proc generate_json_payload {exiles_a exiles_b} {
+proc generate_json_payload {exiles_a exiles_b team_a_endhp team_b_endhp} {
 	set fp [open "/tmp/payload" w+]
 
 	puts $fp "{"
@@ -114,7 +114,7 @@ proc generate_json_payload {exiles_a exiles_b} {
 	puts $fp "    \"triumvirate\": 1,"
 	puts $fp "    \"input_method\": 1,"
 	puts $fp "    \"pyre_start_health\": 100,"
-	puts $fp "    \"pyre_end_health\": 0,"
+	puts $fp "    \"pyre_end_health\": ${team_a_endhp},"
 	puts $fp "    \"host\": true,"
 	puts $fp "    \"exiles\": \["
 	puts $fp "      {"
@@ -133,7 +133,7 @@ proc generate_json_payload {exiles_a exiles_b} {
 	puts $fp "    \"triumvirate\": 2,"
 	puts $fp "    \"input_method\": 2,"
 	puts $fp "    \"pyre_start_health\": 100,"
-	puts $fp "    \"pyre_end_health\": 50,"
+	puts $fp "    \"pyre_end_health\": ${team_b_endhp},"
 	puts $fp "    \"host\": false,"
 	puts $fp "    \"exiles\": \["
 	puts $fp "      {"
@@ -180,6 +180,8 @@ proc handle_pyre_output {stream} {
         set fancy_exiles_team_a [list]
         set exiles_team_b [list]
         set fancy_exiles_team_b [list]
+        set team_a_endhp -1
+        set team_b_endhp -1
       }
 
       # Got all rite data, upload it!
@@ -191,7 +193,7 @@ proc handle_pyre_output {stream} {
         # to/from a file >:|
         #
         # XXX This works, just needs to be prettified
-        set fp [generate_json_payload ${exiles_team_a} ${exiles_team_b}]
+        set fp [generate_json_payload ${exiles_team_a} ${exiles_team_b} ${team_a_endhp} ${team_b_endhp}]
         set token [::http::geturl "${DATABASE_SERVER}/api/v1/rites" -method POST -type application/json -querychannel $fp]
         close $fp
         ::http::cleanup $token
@@ -200,6 +202,8 @@ proc handle_pyre_output {stream} {
         unset fancy_exiles_team_a
         unset exiles_team_b
         unset fancy_exiles_team_b
+        unset team_a_endhp
+        unset team_b_endhp
       }
 
       # XXX Annoying that we're opening the file 3 times (times 2)...
@@ -217,6 +221,9 @@ proc handle_pyre_output {stream} {
         lappend fancy_exiles_team_b $charname
         lappend exiles_team_b $value
       }
+
+      if { $directive == "TEAM1ENDHP" } { set team_a_endhp $value }
+      if { $directive == "TEAM2ENDHP" } { set team_b_endhp $value }
     }
   }
 }
