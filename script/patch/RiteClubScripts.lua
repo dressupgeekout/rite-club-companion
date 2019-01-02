@@ -198,8 +198,17 @@ function RiteClubReport(team_a, team_b)
       end
     end
 
+    if i == 1 then
+      t = RiteClub.TeamA
+    else
+      t = RiteClub.TeamB
+    end
+
+    print(RITE_CLUB_REPORT_PREFIX .. "|" .. "TEAM" .. i .. "TRIUMVIRATE" .. "|" .. t.Name)
+    print(RITE_CLUB_REPORT_PREFIX .. "|" .. "TEAM" .. i .. "STARTHP" .. "|" .. t.StartingPyreHealth)
     print(RITE_CLUB_REPORT_PREFIX .. "|" .. "TEAM" .. i .. "ENDHP" .. "|" .. team.PyreHealth)
   end
+
 
   print(RITE_CLUB_REPORT_PREFIX .. "|STOP")
 end

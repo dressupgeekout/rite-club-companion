@@ -1,0 +1,21 @@
+--- ./Scripts/UIScripts.lua.orig	2019-01-02 15:10:04.000000000 -0800
++++ ./Scripts/UIScripts.lua	2019-01-02 15:01:36.000000000 -0800
+@@ -3642,6 +3642,18 @@
+ 		LocalMPTeamBName = League[teamBIndex].TeamName
+ 		LocalMPTeamBPyreHealth = GetConfigOptionValue({ Name = "LocalMPTeamBPyreHealth" })
+ 
++    RiteClub = {
++      TeamA = {
++        Name = LocalMPTeamAName,
++        StartingPyreHealth = LocalMPTeamAPyreHealth,
++      },
++      TeamB = {
++        Name = LocalMPTeamBName,
++        StartingPyreHealth = LocalMPTeamBPyreHealth,
++      }
++    }
++    PersistVariable({Name = "RiteClub"})
++
+ 		if GetConfigOptionValue({ Name = "LocalMPUseConstellations" }) then
+ 			SetMenuOptions({ Name = "LocalMPScreen", Item = "ConstellationsButton", Properties = { Graphic = "GUI\\Screens\\Versus\\CheckBox_Checked", TooltipId = "LocalMP_ConstellationsOn" } })
+ 		else
