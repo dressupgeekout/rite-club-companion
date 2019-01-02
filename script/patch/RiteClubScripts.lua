@@ -199,16 +199,16 @@ function RiteClubReport(team)
 
   _G.RiteClub.n_matches = _G.RiteClub.n_matches + 1
 
+  print(RITE_CLUB_REPORT_PREFIX .. "|START")
+
   -- The "team" table always has all of the team's members,so it's up to us
   -- to figure out which ones actualy participated in the Rite which just
   --- occurred.
   for _, exile in pairs(team.TeamBench) do
     if exile.ActiveStatus == "PlayedLastMatch" then
-      table.insert(winners, exile.FirstName)
+      print(RITE_CLUB_REPORT_PREFIX .. "|" .. "EXILE1" .. "|" .. tostring(exile.CharacterIndex))
     end
   end
 
-  for _, exile in pairs(winners) do
-    print(RITE_CLUB_REPORT_PREFIX .. "|" .. tostring(_G.RiteClub.n_matches) .."|" .. exile)
-  end
+  print(RITE_CLUB_REPORT_PREFIX .. "|STOP")
 end

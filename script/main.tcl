@@ -100,17 +100,47 @@ proc pyre_real_location {} {
   }
 }
 
+proc handle_pyre_output {stream} {
+  global HERE
+
+  set fp [open [file join ${HERE} "CHARACTER_MAPPING.txt"] r]
+  set character_mapping [split [read -nonewline $fp] "\n"]
+  close $fp
+
+  while {[gets $stream line] >= 0} {
+    if [regexp {^RITECLUB} ${line}] {
+      set tokens [split $line "|"]
+      set beacon [lindex $tokens 0]
+      set directive [lindex $tokens 1]
+      set value [lindex $tokens 2]
+
+      if { $directive == "START" } {
+        set exiles [list]
+      }
+
+      if { $directive == "STOP" } {
+        # XXX upload it!
+        puts [join $exiles " & "]
+        unset exiles
+      }
+
+      # XXX Annoying that we're opening the file 3 times
+      if { $directive == "EXILE1" || $directive == "EXILE2" || $directive == "EXILE3" } {
+        # Minus 1 because arrays are zero-based, but the first character is
+        # character 1:
+        set charname [lindex $character_mapping [expr ${value}-1]]
+        lappend exiles $charname
+      }
+    }
+  }
+}
+
 proc launch_pyre {} {
   global PYRE_LOCATION
   set real_location [pyre_real_location]
   set stream [open "|${real_location}"]
-  while {[gets $stream line] >= 0} {
-    if [regexp {^RITECLUB} ${line}] {
-      # XXX tokenize it!
-      puts "GOT -> ${line}"
-    }
-  }
-  close ${stream}
+  handle_pyre_output $stream
+  close $stream
 }
 
 proc ping_database_server {} {
