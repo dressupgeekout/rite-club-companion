@@ -103,7 +103,14 @@ proc pyre_real_location {} {
 proc launch_pyre {} {
   global PYRE_LOCATION
   set real_location [pyre_real_location]
-  exec -ignorestderr -- ${real_location} > /tmp/whatever 2>@1 &
+  set stream [open "|${real_location}"]
+  while {[gets $stream line] >= 0} {
+    if [regexp {^RITECLUB} ${line}] {
+      # XXX tokenize it!
+      puts "GOT -> ${line}"
+    }
+  }
+  close ${stream}
 }
 
 proc ping_database_server {} {
