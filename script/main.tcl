@@ -4,6 +4,7 @@
 
 package require http
 package require platform
+package require xml
 
 # === GLOBALS ===
 set HERE [file normalize [file dirname $argv0]]
@@ -22,7 +23,6 @@ image create photo pyre_logo -file "${IMG_DIR}/pyre.png"
 # === MAIN WINDOW SETUP ===
 wm title . ${APP_NAME}
 wm iconphoto . -default pyre_logo
-#wm geometry . "=800x600"
 wm resizable . true true
 
 ttk::label .title_label_img -image pyre_logo
@@ -100,17 +100,70 @@ proc pyre_real_location {} {
   }
 }
 
+proc pyre_content_dir {} {
+  set real_loc [pyre_real_location]
+  return [file join $real_loc "Content"]
+}
+
+proc callback {id name attlist args} {
+  upvar displayname _displayname
+  set found_id ""
+
+  for {set i 0} {$i < [llength ${attlist}]} {incr i 2} {
+    if {[lindex ${attlist} $i] == "Id"} {
+      set found_id [lindex ${attlist} [expr $i+1]]
+    }
+
+    if {[lindex ${attlist} $i] == "DisplayName"} {
+      set found_displayname [lindex ${attlist} [expr $i+1]]
+    }
+  }
+
+  if {$found_id == $id} {
+    set _displayname $found_displayname
+  }
+}
+
+proc process_pyre_mod_output {stream} {
+  while {[gets $stream line] >= 0} {
+    if [regexp {^RITECLUB} ${line}] {
+      set tokens [split ${line} "|"]
+      set beacon [lindex ${tokens} 0] 
+      set directive [lindex ${tokens} 1]
+      set value [lindex ${tokens} 2]
+
+      if { $directive == "START" } {
+        set exiles [list]
+      }
+
+      if { $directive == "STOP" } {
+        # XXX post it to the db!!
+        puts [join $exiles " & "]
+        unset exiles
+      }
+
+      if { $directive == "EXILE1" || $directive == "EXILE2" || $directive == "EXILE3" } {
+        # XXX I hate this
+
+        set $displayname ""
+
+        set parser [::xml::parser -elementstartcommand [list callback $value]]
+        set xmldoc [open [file join [pyre_content_dir] "Game" "Text" "HelpText.en.xml"]]
+        $parser parse [read $xmldoc]
+        close $xmldoc
+
+        lappend exiles $displayname
+      }
+    }
+  }
+}
+
 proc launch_pyre {} {
   global PYRE_LOCATION
   set real_location [pyre_real_location]
   set stream [open "|${real_location}"]
-  while {[gets $stream line] >= 0} {
-    if [regexp {^RITECLUB} ${line}] {
-      # XXX tokenize it!
-      puts "GOT -> ${line}"
-    }
-  }
-  close ${stream}
+  process_pyre_mod_output $stream
+  close $stream
 }
 
 proc ping_database_server {} {
