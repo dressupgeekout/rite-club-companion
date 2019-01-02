@@ -185,28 +185,17 @@ function RiteClubPretty(x)
 end
 
 -- Writes a bunch of information to the standard output.
---
--- XXX should take in *2* team-tables, one for the winner and one for the
--- loser.
-function RiteClubReport(team)
-  local winners = {}
-
-  if not (_G.RiteClub) then
-    _G.RiteClub = {
-      ["n_matches"] = 0,
-    }
-  end
-
-  _G.RiteClub.n_matches = _G.RiteClub.n_matches + 1
-
+function RiteClubReport(team_a, team_b)
   print(RITE_CLUB_REPORT_PREFIX .. "|START")
 
-  -- The "team" table always has all of the team's members,so it's up to us
-  -- to figure out which ones actualy participated in the Rite which just
-  --- occurred.
-  for _, exile in pairs(team.TeamBench) do
-    if exile.ActiveStatus == "PlayedLastMatch" then
-      print(RITE_CLUB_REPORT_PREFIX .. "|" .. "EXILE1" .. "|" .. tostring(exile.CharacterIndex))
+  for i, team in ipairs({team_a, team_b}) do
+    -- The "team" table always has all of the team's members,so it's up to us
+    -- to figure out which ones actualy participated in the Rite which just
+    -- occurred.
+    for _, exile in pairs(team.TeamBench) do
+      if exile.ActiveStatus == "PlayedLastMatch" then
+        print(RITE_CLUB_REPORT_PREFIX .. "|" .. "TEAM" .. i .. "EXILE" .. "|" .. exile.CharacterIndex)
+      end
     end
   end
 
