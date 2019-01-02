@@ -102,10 +102,8 @@ proc pyre_real_location {} {
   }
 }
 
-# 'exiles' is an array of character indexes
-#
 # XXX require a proper JSON generator
-proc generate_json_payload {exiles_a exiles_b team_a_endhp team_b_endhp} {
+proc generate_json_payload {team_a team_b} {
 	set fp [open "/tmp/payload" w+]
 
 	puts $fp "{"
@@ -114,17 +112,17 @@ proc generate_json_payload {exiles_a exiles_b team_a_endhp team_b_endhp} {
 	puts $fp "    \"triumvirate\": 1,"
 	puts $fp "    \"input_method\": 1,"
 	puts $fp "    \"pyre_start_health\": 100,"
-	puts $fp "    \"pyre_end_health\": ${team_a_endhp},"
+	puts $fp "    \"pyre_end_health\": [dict get $team_a endhp],"
 	puts $fp "    \"host\": true,"
 	puts $fp "    \"exiles\": \["
 	puts $fp "      {"
-	puts $fp "        \"character_index\": [lindex $exiles_a 0]"
+	puts $fp "        \"character_index\": [lindex [dict get $team_a exiles] 0]"
 	puts $fp "      },"
 	puts $fp "      {"
-	puts $fp "        \"character_index\": [lindex $exiles_a 1]"
+	puts $fp "        \"character_index\": [lindex [dict get $team_a exiles] 1]"
 	puts $fp "      },"
 	puts $fp "      {"
-	puts $fp "        \"character_index\": [lindex $exiles_a 2]"
+	puts $fp "        \"character_index\": [lindex [dict get $team_a exiles] 2]"
 	puts $fp "      }"
 	puts $fp "    ]"
 	puts $fp "  },"
@@ -133,17 +131,17 @@ proc generate_json_payload {exiles_a exiles_b team_a_endhp team_b_endhp} {
 	puts $fp "    \"triumvirate\": 2,"
 	puts $fp "    \"input_method\": 2,"
 	puts $fp "    \"pyre_start_health\": 100,"
-	puts $fp "    \"pyre_end_health\": ${team_b_endhp},"
+	puts $fp "    \"pyre_end_health\": [dict get $team_b endhp],"
 	puts $fp "    \"host\": false,"
 	puts $fp "    \"exiles\": \["
 	puts $fp "      {"
-	puts $fp "        \"character_index\": [lindex $exiles_b 0]"
+	puts $fp "        \"character_index\": [lindex [dict get $team_b exiles] 0]"
 	puts $fp "      },"
 	puts $fp "      {"
-	puts $fp "        \"character_index\": [lindex $exiles_b 1]"
+	puts $fp "        \"character_index\": [lindex [dict get $team_b exiles] 1]"
 	puts $fp "      },"
 	puts $fp "      {"
-	puts $fp "        \"character_index\": [lindex $exiles_b 2]"
+	puts $fp "        \"character_index\": [lindex [dict get $team_b exiles] 2]"
 	puts $fp "      }"
 	puts $fp "    ]"
 	puts $fp "  },"
@@ -164,10 +162,6 @@ proc handle_pyre_output {stream} {
   global HERE
   global DATABASE_SERVER
 
-  set fp [open [file join ${HERE} "CHARACTER_MAPPING.txt"] r]
-  set character_mapping [split [read -nonewline $fp] "\n"]
-  close $fp
-
   while {[gets $stream line] >= 0} {
     if [regexp {^RITECLUB} ${line}] {
       set tokens [split $line "|"]
@@ -176,54 +170,29 @@ proc handle_pyre_output {stream} {
       set value [lindex $tokens 2]
 
       if { $directive == "START" } {
-        set exiles_team_a [list]
-        set fancy_exiles_team_a [list]
-        set exiles_team_b [list]
-        set fancy_exiles_team_b [list]
-        set team_a_endhp -1
-        set team_b_endhp -1
+        set team_a [dict create exiles [list]]
+        set team_b [dict create exiles [list]]
       }
 
       # Got all rite data, upload it!
       if { $directive == "STOP" } {
-        puts "TEAM A: [join $fancy_exiles_team_a ,]"
-        puts "TEAM B: [join $fancy_exiles_team_b ,]"
-
         # There isn't a readymade 'stringio' class, so its just easier to read/write
         # to/from a file >:|
         #
         # XXX This works, just needs to be prettified
-        set fp [generate_json_payload ${exiles_team_a} ${exiles_team_b} ${team_a_endhp} ${team_b_endhp}]
+        set fp [generate_json_payload ${team_a} ${team_b}]
         set token [::http::geturl "${DATABASE_SERVER}/api/v1/rites" -method POST -type application/json -querychannel $fp]
         close $fp
         ::http::cleanup $token
 
-        unset exiles_team_a
-        unset fancy_exiles_team_a
-        unset exiles_team_b
-        unset fancy_exiles_team_b
-        unset team_a_endhp
-        unset team_b_endhp
+        unset team_a
+        unset team_b
       }
 
-      # XXX Annoying that we're opening the file 3 times (times 2)...
-      if { $directive == "TEAM1EXILE" } {
-        # Minus 1 because arrays are zero-based, but the first character is
-        # character 1:
-        set charname [lindex $character_mapping [expr ${value}-1]]
-        lappend fancy_exiles_team_a $charname
-        lappend exiles_team_a $value
-      }
-
-      if { $directive == "TEAM2EXILE" } {
-        # As before vv ^^
-        set charname [lindex $character_mapping [expr ${value}-1]]
-        lappend fancy_exiles_team_b $charname
-        lappend exiles_team_b $value
-      }
-
-      if { $directive == "TEAM1ENDHP" } { set team_a_endhp $value }
-      if { $directive == "TEAM2ENDHP" } { set team_b_endhp $value }
+      if { $directive == "TEAM1EXILE" } { dict lappend team_a exiles $value }
+      if { $directive == "TEAM2EXILE" } { dict lappend team_b exiles $value }
+      if { $directive == "TEAM1ENDHP" } { dict set team_a endhp $value }
+      if { $directive == "TEAM2ENDHP" } { dict set team_b endhp $value }
     }
   }
 }
