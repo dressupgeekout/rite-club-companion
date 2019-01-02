@@ -106,7 +106,58 @@ proc pyre_real_location {} {
 #
 # XXX require a proper JSON generator
 proc generate_json_payload {exiles} {
-  return ""
+	set fp [open "/tmp/payload" w+]
+
+	puts $fp "{"
+	puts $fp "  \"player_a\": {"
+	puts $fp "    \"id\": 1,"
+	puts $fp "    \"triumvirate\": 1,"
+	puts $fp "    \"input_method\": 1,"
+	puts $fp "    \"pyre_start_health\": 100,"
+	puts $fp "    \"pyre_end_health\": 0,"
+	puts $fp "    \"host\": true,"
+	puts $fp "    \"exiles\": \["
+	puts $fp "      {"
+	puts $fp "        \"character_index\": [lindex $exiles 0]"
+	puts $fp "      },"
+	puts $fp "      {"
+	puts $fp "        \"character_index\": [lindex $exiles 1]"
+	puts $fp "      },"
+	puts $fp "      {"
+	puts $fp "        \"character_index\": [lindex $exiles 2]"
+	puts $fp "      }"
+	puts $fp "    ]"
+	puts $fp "  },"
+	puts $fp "  \"player_b\": {"
+	puts $fp "    \"id\": 2,"
+	puts $fp "    \"triumvirate\": 2,"
+	puts $fp "    \"input_method\": 2,"
+	puts $fp "    \"pyre_start_health\": 100,"
+	puts $fp "    \"pyre_end_health\": 50,"
+	puts $fp "    \"host\": false,"
+	puts $fp "    \"exiles\": \["
+	puts $fp "      {"
+	puts $fp "        \"character_index\": 4"
+	puts $fp "      },"
+	puts $fp "      {"
+	puts $fp "        \"character_index\": 5"
+	puts $fp "      },"
+	puts $fp "      {"
+	puts $fp "        \"character_index\": 6"
+	puts $fp "      }"
+	puts $fp "    ]"
+	puts $fp "  },"
+	puts $fp "  \"rite\": {"
+	puts $fp "    \"stage\": 1,"
+	puts $fp "    \"masteries_allowed\": 4,"
+	puts $fp "    \"duration\": 60"
+	puts $fp "  }"
+	puts $fp "}"
+
+	close $fp
+
+	set fp [open "/tmp/payload" r]
+  return $fp
 }
 
 proc handle_pyre_output {stream} {
@@ -126,22 +177,24 @@ proc handle_pyre_output {stream} {
 
       if { $directive == "START" } {
         set exiles [list]
+        set fancy_exiles [list]
       }
 
       # Got all rite data, upload it!
       if { $directive == "STOP" } {
-        puts [join $exiles " & "]
+        puts [join $fancy_exiles " & "]
 
         # There isn't a readymade 'stringio' class, so its just easier to read/write
         # to/from a file >:|
         #
         # XXX This works, just needs to be prettified
-        set fp [open "/Users/charlotte/devel/rite-club-web/testdata/rite01.json" r]
+        set fp [generate_json_payload ${exiles}]
         set token [::http::geturl "${DATABASE_SERVER}/api/v1/rites" -method POST -type application/json -querychannel $fp]
         close $fp
         ::http::cleanup $token
 
         unset exiles
+        unset fancy_exiles
       }
 
       # XXX Annoying that we're opening the file 3 times
@@ -149,7 +202,8 @@ proc handle_pyre_output {stream} {
         # Minus 1 because arrays are zero-based, but the first character is
         # character 1:
         set charname [lindex $character_mapping [expr ${value}-1]]
-        lappend exiles $charname
+        lappend fancy_exiles $charname
+        lappend exiles $value
       }
     }
   }
