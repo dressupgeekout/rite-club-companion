@@ -173,7 +173,7 @@ local serpent = { _NAME = n, _COPYRIGHT = c, _DESCRIPTION = d, _VERSION = v, ser
 
 --[[==== RITE CLUB SCRIPTS ====]]
 
-local RITE_CLUB_REPORT_PREFIX = "RITECLUB:"
+local RITE_CLUB_REPORT_PREFIX = "RITECLUB"
 
 -- Returns a very pretty string representation of the given element, mostly
 -- for debugging purposes. Normally you want to do this:
@@ -185,16 +185,30 @@ function RiteClubPretty(x)
 end
 
 -- Writes a bunch of information to the standard output.
-function RiteClubReport(team_table)
+--
+-- XXX should take in *2* team-tables, one for the winner and one for the
+-- loser.
+function RiteClubReport(team)
   local winners = {}
 
-  for _, exile in pairs(team_table['TeamBench']) do
+  if not (_G.RiteClub) then
+    _G.RiteClub = {
+      ["n_matches"] = 0,
+    }
+  end
+
+  _G.RiteClub.n_matches = _G.RiteClub.n_matches + 1
+
+  -- The "team" table always has all of the team's members,so it's up to us
+  -- to figure out which ones actualy participated in the Rite which just
+  --- occurred.
+  for _, exile in pairs(team.TeamBench) do
     if exile.ActiveStatus == "PlayedLastMatch" then
-      table.insert(winners, exile['Portrait'])
+      table.insert(winners, exile.FirstName)
     end
   end
 
   for _, exile in pairs(winners) do
-    print(RITE_CLUB_REPORT_PREFIX .. "WINNING_EXILES=" .. exile)
+    print(RITE_CLUB_REPORT_PREFIX .. "|" .. tostring(_G.RiteClub.n_matches) .."|" .. exile)
   end
 end
