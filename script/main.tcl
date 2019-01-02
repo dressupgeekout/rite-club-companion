@@ -10,6 +10,8 @@ set HERE [file normalize [file dirname $argv0]]
 set IMG_DIR [file join ${HERE} "img"]
 set APP_NAME "Rite Club Companion"
 
+set DATABASE_SERVER "http://localhost:9292/"
+
 set PYRE_LOCATION "(unset)"
 set PYRE_VERSION "(unknown version)"
 
@@ -100,8 +102,16 @@ proc pyre_real_location {} {
   }
 }
 
+# 'exiles' is an array of character indexes
+#
+# XXX require a proper JSON generator
+proc generate_json_payload {exiles} {
+  return ""
+}
+
 proc handle_pyre_output {stream} {
   global HERE
+  global DATABASE_SERVER
 
   set fp [open [file join ${HERE} "CHARACTER_MAPPING.txt"] r]
   set character_mapping [split [read -nonewline $fp] "\n"]
@@ -118,9 +128,19 @@ proc handle_pyre_output {stream} {
         set exiles [list]
       }
 
+      # Got all rite data, upload it!
       if { $directive == "STOP" } {
-        # XXX upload it!
         puts [join $exiles " & "]
+
+        # There isn't a readymade 'stringio' class, so its just easier to read/write
+        # to/from a file >:|
+        #
+        # XXX This works, just needs to be prettified
+        set fp [open "/Users/charlotte/devel/rite-club-web/testdata/rite01.json" r]
+        set token [::http::geturl "${DATABASE_SERVER}/api/v1/rites" -method POST -type application/json -querychannel $fp]
+        close $fp
+        ::http::cleanup $token
+
         unset exiles
       }
 
@@ -144,7 +164,9 @@ proc launch_pyre {} {
 }
 
 proc ping_database_server {} {
-  set token [::http::geturl "http://noxalas.net" -validate true]
+  global DATABASE_SERVER
+
+  set token [::http::geturl ${DATABASE_SERVER} -validate true]
   set status_code [::http::ncode ${token}]
   ::http::cleanup ${token}
   if { ${status_code} == 200 } {
@@ -201,12 +223,3 @@ grid .launch_pyre_button -row 5 -column 0 -columnspan 2 -sticky news
 
 # === STARTUP COMMANDS ===
 ping_database_server
-
-# There isn't a readymade 'stringio' class, so its just easier to read/write
-# to/from a file >:|
-#
-# XXX This works, just needs to be prettified
-#set fp [open "/Users/charlotte/devel/rite-club-web/testdata/rite01.json" r]
-#set token [::http::geturl "http://localhost:9292/api/v1/rites" -method POST -type application/json -querychannel $fp]
-#close $fp
-#::http::cleanup $token
