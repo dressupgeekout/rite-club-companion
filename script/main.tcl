@@ -109,7 +109,7 @@ proc generate_json_payload {team_a team_b} {
 	puts $fp "{"
 	puts $fp "  \"player_a\": {"
 	puts $fp "    \"id\": 1,"
-	puts $fp "    \"triumvirate\": 1,"
+	puts $fp "    \"triumvirate\": [dict get $team_a triumvirate],"
 	puts $fp "    \"input_method\": 1,"
 	puts $fp "    \"pyre_start_health\": [dict get $team_a starthp],"
 	puts $fp "    \"pyre_end_health\": [dict get $team_a endhp],"
@@ -128,7 +128,7 @@ proc generate_json_payload {team_a team_b} {
 	puts $fp "  },"
 	puts $fp "  \"player_b\": {"
 	puts $fp "    \"id\": 2,"
-	puts $fp "    \"triumvirate\": 2,"
+	puts $fp "    \"triumvirate\": [dict get $team_b triumvirate],"
 	puts $fp "    \"input_method\": 2,"
 	puts $fp "    \"pyre_start_health\": [dict get $team_b starthp],"
 	puts $fp "    \"pyre_end_health\": [dict get $team_b endhp],"
@@ -195,8 +195,10 @@ proc handle_pyre_output {stream} {
       if { $directive == "TEAM2EXILE" } { dict lappend team_b exiles $value }
       if { $directive == "TEAM1STARTHP" } { dict set team_a starthp $value }
       if { $directive == "TEAM2STARTHP" } { dict set team_b starthp $value }
-      if { $directive == "TEAM1TRIUMVIRATE" } { dict set team_a triumvirate $value }
-      if { $directive == "TEAM2TRIUMVIRATE" } { dict set team_b triumvirate $value }
+
+      # This performs the transformation: "TeamName02" -> 2
+      if { $directive == "TEAM1TRIUMVIRATE" } { dict set team_a triumvirate [expr [regsub TeamName $value ""]] }
+      if { $directive == "TEAM2TRIUMVIRATE" } { dict set team_b triumvirate [expr [regsub TeamName $value ""]] }
     }
   }
 }
