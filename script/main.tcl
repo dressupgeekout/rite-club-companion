@@ -197,8 +197,8 @@ proc handle_pyre_output {stream} {
       if { $directive == "TEAM2STARTHP" } { dict set team_b starthp $value }
 
       # This performs the transformation: "TeamName02" -> 2
-      if { $directive == "TEAM1TRIUMVIRATE" } { dict set team_a triumvirate [expr [regsub TeamName $value ""]] }
-      if { $directive == "TEAM2TRIUMVIRATE" } { dict set team_b triumvirate [expr [regsub TeamName $value ""]] }
+      if { $directive == "TEAM1TRIUMVIRATE" } { dict set team_a triumvirate [regsub {TeamName0?} $value ""] }
+      if { $directive == "TEAM2TRIUMVIRATE" } { dict set team_b triumvirate [regsub {TeamName0?} $value ""] }
     }
   }
 }
