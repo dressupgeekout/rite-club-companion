@@ -55,6 +55,7 @@ archive_workdir:=	$(workdir)/$(archive_basename)
 
 tcl_configure_flags=	# defined
 tcl_configure_flags+=	--disable-shared
+tcl_configure_flags+=	--without-tzdata
 ifeq ($(PLATFORM),win)
 tcl_configure_flags+=	--host=$(MINGW_TRIPLE)
 endif
