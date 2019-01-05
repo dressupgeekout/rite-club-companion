@@ -206,9 +206,8 @@ proc handle_pyre_output {stream} {
 proc launch_pyre {} {
   global PYRE_LOCATION
   set real_location [pyre_real_location]
-  set stream [open "|${real_location}"]
+  set stream [open "|\"${real_location}\""]
   handle_pyre_output $stream
-  close $stream
 }
 
 proc ping_database_server {} {
