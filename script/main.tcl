@@ -12,8 +12,10 @@ set APP_NAME "Rite Club Companion"
 
 set DATABASE_SERVER "http://localhost:9292/"
 
-set PYRE_LOCATION "(unset)"
-set PYRE_VERSION "(unknown version)"
+set __unset__ "(unset)"
+set __unknown__ "(unknown)"
+set PYRE_LOCATION ${__unset__}
+set PYRE_VERSION ${__unknown__}
 
 set ALL_READERS ""
 set ALL_READER_NAMES [list]
@@ -236,8 +238,43 @@ proc handle_pyre_output {stream} {
   }
 }
 
+proc pyre_preflight_checks {} {
+  global PYRE_LOCATION
+  global __unset__
+
+  set reader_a [.reader_a_selection get]
+  set reader_b [.reader_b_selection get]
+
+  if {$PYRE_LOCATION == ${__unset__}} {
+    note "You haven't noted where Pyre is located!"
+    return false
+  }
+
+  if {$reader_a == ""} {
+    note "Reader A is not selected"
+    return false
+  }
+
+  if {$reader_b == ""} {
+    note "Reader B is not selected"
+    return false
+  }
+
+  if {$reader_a == $reader_b} {
+    note "${reader_a} cannot compete against themselves!"
+    return false
+  }
+
+  return true
+}
+
 proc launch_pyre {} {
   global PYRE_LOCATION
+
+  if {![pyre_preflight_checks]} {
+    return false
+  }
+
   set real_location [pyre_real_location]
   note "launching Pyre at: ${real_location}"
   set stream [open "|\"${real_location}\""]
