@@ -270,4 +270,6 @@ grid .launch_pyre_button -row 5 -column 0 -columnspan 2 -sticky news
 
 
 # === STARTUP COMMANDS ===
-ping_database_server
+catch {
+  ping_database_server
+}
