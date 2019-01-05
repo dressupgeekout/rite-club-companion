@@ -162,7 +162,7 @@ proc generate_json_payload {team_a team_b rite} {
   puts $fp "    ]"
   puts $fp "  },"
   puts $fp "  \"rite\": {"
-  puts $fp "    \"stage\": \"[dict get $rite stage]\","
+  puts $fp "    \"stage\": [dict get $rite stage],"
   puts $fp "    \"masteries_allowed\": 4,"
   puts $fp "    \"duration\": 60"
   puts $fp "  }"
@@ -172,6 +172,23 @@ proc generate_json_payload {team_a team_b rite} {
 
   set fp [open "/tmp/payload" r]
   return $fp
+}
+
+# This performs the transformation: "TeamName02" -> 2
+proc team_key_to_index {key} {
+  set index [regsub {TeamName0?} $key ""]
+  note "TRANSFORM ${key} -> ${index}"
+  return $index
+}
+
+# This performs the transformation: "MatchSiteE" -> 5
+proc match_site_key_to_index {key} {
+  set alphabet [list A B C D E F G H I J]
+  set letter [regsub {MatchSite} $key ""]
+  # +1 to ensure A=>1, not A=>0
+  set index [expr [lsearch $alphabet $letter] + 1]
+  note "TRANSFORM ${key} -> ${letter} -> ${index}"
+  return $index
 }
 
 proc handle_pyre_output {stream} {
@@ -213,13 +230,9 @@ proc handle_pyre_output {stream} {
       if { $directive == "TEAM2EXILE" } { dict lappend team_b exiles $value }
       if { $directive == "TEAM1STARTHP" } { dict set team_a starthp $value }
       if { $directive == "TEAM2STARTHP" } { dict set team_b starthp $value }
-
-      # This performs the transformation: "TeamName02" -> 2
-      if { $directive == "TEAM1TRIUMVIRATE" } { dict set team_a triumvirate [regsub {TeamName0?} $value ""] }
-      if { $directive == "TEAM2TRIUMVIRATE" } { dict set team_b triumvirate [regsub {TeamName0?} $value ""] }
-
-      # This performs the transformation: "MatchSiteE" -> "E"
-      if { $directive == "STAGE" } { dict set rite stage [regsub {MatchSite} $value ""] }
+      if { $directive == "TEAM1TRIUMVIRATE" } { dict set team_a triumvirate [team_key_to_index $value] }
+      if { $directive == "TEAM2TRIUMVIRATE" } { dict set team_b triumvirate [team_key_to_index $value] }
+      if { $directive == "STAGE" } { dict set rite stage [match_site_key_to_index $value] }
     }
   }
 }
