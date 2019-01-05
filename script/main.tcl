@@ -27,6 +27,16 @@ source [file join ${HERE}/ton.tcl]
 
 image create photo pyre_logo -file "${IMG_DIR}/pyre.png"
 
+# === UTILITY FUNCTIONS ===
+proc note {msg} {
+  global APP_NAME
+  puts stderr "${APP_NAME}: ${msg}"
+}
+
+proc warning {msg} {
+  note "WARNING: ${msg}"
+}
+
 # === MAIN WINDOW SETUP ===
 wm title . ${APP_NAME}
 wm iconphoto . -default pyre_logo
@@ -86,13 +96,13 @@ proc get_pyre_version {} {
     set alleged_game [string trim [lindex $lines 0]]
     set alleged_version [string trim [lindex $lines 1]]
     if { $alleged_game != "Pyre" } {
-      puts "this is not pyre"
+      warning "this is not pyre"
       # XXX exit
     }
     set PYRE_VERSION ${alleged_version}
   } else {
     # XXX should error!
-    puts "invalid!!"
+    warning "can't determine Pyre version!"
   }
 }
 
@@ -223,10 +233,10 @@ proc ping_database_server {} {
   set status_code [::http::ncode ${token}]
   ::http::cleanup ${token}
   if { ${status_code} == 200 } {
-    puts "PING OK"
+    note "ping ${DATABASE_SERVER} OK"
   } else  {
     # XXX is an error
-    puts "COULDN'T PING!"
+    wearning "couldn't ping ${DATABASE_SERVER}"
   }
 }
 
@@ -243,11 +253,11 @@ proc fetch_readers {} {
   set result [list]
 
   if { $status_code == 200 } {
-    puts "GOT USERNAMES"
     set res_body [::http::data $token]
+    note "got usernames: ${res_body}"
     set res_obj [namespace eval ton::2list [ton::json2ton $res_body]]
   } else {
-    puts "COULDN'T GET USERNAMES!"
+    warning "couldn't get usernames!"
     ::http::cleanup $token
     return $result
   }
