@@ -17,6 +17,7 @@ set PYRE_VERSION "(unknown version)"
 
 set READER_A ""
 set READER_B ""
+set ALL_READERS [list]
 
 set fp [open "${HERE}/VERSION" r]
 set VERSION [string trim [gets $fp]]
@@ -231,15 +232,20 @@ proc ping_database_server {} {
 
 proc fetch_readers {} {
   global DATABASE_SERVER
+  global ALL_READERS
+
+  if {[llength $ALL_READERS] > 0} {
+    return $ALL_READERS
+  }
 
   set token [::http::geturl ${DATABASE_SERVER}/api/v1/usernames -method GET]
   set status_code [::http::ncode $token]
-
   set result [list]
 
   if { $status_code == 200 } {
-    set response_body [::http::data $token]
-    set obj [namespace eval ton::2list [ton::json2ton ${response_body}]]
+    puts "GOT USERNAMES"
+    set res_body [::http::data $token]
+    set res_obj [namespace eval ton::2list [ton::json2ton $res_body]]
   } else {
     puts "COULDN'T GET USERNAMES!"
     ::http::cleanup $token
@@ -248,15 +254,12 @@ proc fetch_readers {} {
 
   ::http::cleanup $token
 
-  set result [list]
-
-  puts [llength $obj]
-
-  for {set i 0} {$i < [expr [llength $obj]-1]} {incr i} {
-    lappend result [ton::2list::get $obj $i username]
+  for {set i 0} {$i < [expr [llength $res_obj]-1]} {incr i} {
+    lappend result [ton::2list::get $res_obj $i username]
   }
 
-  return $result
+  set ALL_READERS $result
+  return $ALL_READERS
 }
 
 
@@ -290,9 +293,13 @@ ttk::label .pyre_version_label -text "Pyre version:"
 ttk::label .pyre_version -textvariable PYRE_VERSION
 
 ttk::label .reader_a_label -text "Reader A:"
-ttk::combobox .reader_a -textvariable READER_A -values [fetch_readers]
+ttk::combobox .reader_a_selection -textvariable READER_A -postcommand {
+  .reader_a_selection configure -values [fetch_readers]
+}
 ttk::label .reader_b_label -text "Reader B:"
-ttk::combobox .reader_b -textvariable READER_B -values [fetch_readers]
+ttk::combobox .reader_b_selection -textvariable READER_B -postcommand {
+  .reader_b_selection configure -values [fetch_readers]
+}
 
 ttk::button .launch_pyre_button -text "Launch!" -command launch_pyre
 
@@ -307,13 +314,17 @@ grid .pyre_version_label -row 4 -column 0 -sticky news
 grid .pyre_version -row 4 -column 1 -sticky news
 
 grid .reader_a_label -row 5 -column 0 -sticky news
-grid .reader_a -row 5 -column 1 -sticky news
+grid .reader_a_selection -row 5 -column 1 -sticky news
 grid .reader_b_label -row 6 -column 0 -sticky news
-grid .reader_b -row 6 -column 1 -sticky news
+grid .reader_b_selection -row 6 -column 1 -sticky news
 grid .launch_pyre_button -row 7 -column 0 -columnspan 2 -sticky news
 
 
 # === STARTUP COMMANDS ===
 catch {
   ping_database_server
+}
+
+catch {
+  fetch_readers
 }
