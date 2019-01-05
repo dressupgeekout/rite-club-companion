@@ -15,9 +15,8 @@ set DATABASE_SERVER "http://localhost:9292/"
 set PYRE_LOCATION "(unset)"
 set PYRE_VERSION "(unknown version)"
 
-set READER_A ""
-set READER_B ""
-set ALL_READERS [list]
+set ALL_READERS ""
+set ALL_READER_NAMES [list]
 
 set fp [open "${HERE}/VERSION" r]
 set VERSION [string trim [gets $fp]]
@@ -124,7 +123,7 @@ proc generate_json_payload {team_a team_b rite} {
 
   puts $fp "{"
   puts $fp "  \"player_a\": {"
-  puts $fp "    \"id\": 1,"
+  puts $fp "    \"id\": [reader_id_from_username [.reader_a_selection get]],"
   puts $fp "    \"triumvirate\": [dict get $team_a triumvirate],"
   puts $fp "    \"input_method\": 1,"
   puts $fp "    \"pyre_start_health\": [dict get $team_a starthp],"
@@ -143,7 +142,7 @@ proc generate_json_payload {team_a team_b rite} {
   puts $fp "    ]"
   puts $fp "  },"
   puts $fp "  \"player_b\": {"
-  puts $fp "    \"id\": 2,"
+  puts $fp "    \"id\": [reader_id_from_username [.reader_b_selection get]],"
   puts $fp "    \"triumvirate\": [dict get $team_b triumvirate],"
   puts $fp "    \"input_method\": 2,"
   puts $fp "    \"pyre_start_health\": [dict get $team_b starthp],"
@@ -263,9 +262,10 @@ proc ping_database_server {} {
 proc fetch_readers {} {
   global DATABASE_SERVER
   global ALL_READERS
+  global ALL_READER_NAMES
 
-  if {[llength $ALL_READERS] > 0} {
-    return $ALL_READERS
+  if {[llength $ALL_READER_NAMES] > 0} {
+    return $ALL_READER_NAMES
   }
 
   set token [::http::geturl ${DATABASE_SERVER}/api/v1/usernames -method GET]
@@ -275,7 +275,7 @@ proc fetch_readers {} {
   if { $status_code == 200 } {
     set res_body [::http::data $token]
     note "got usernames: ${res_body}"
-    set res_obj [namespace eval ton::2list [ton::json2ton $res_body]]
+    set ALL_READERS [namespace eval ton::2list [ton::json2ton $res_body]]
   } else {
     warning "couldn't get usernames!"
     ::http::cleanup $token
@@ -284,14 +284,24 @@ proc fetch_readers {} {
 
   ::http::cleanup $token
 
-  for {set i 0} {$i < [expr [llength $res_obj]-1]} {incr i} {
-    lappend result [ton::2list::get $res_obj $i username]
+  for {set i 0} {$i < [expr [llength $ALL_READERS]-1]} {incr i} {
+    lappend result [ton::2list::get $ALL_READERS $i username]
   }
 
-  set ALL_READERS $result
-  return $ALL_READERS
+  set ALL_READER_NAMES $result
+  return $ALL_READER_NAMES
 }
 
+proc reader_id_from_username {username} {
+  global ALL_READERS
+
+  for {set i 0} {$i < [expr [llength $ALL_READERS]-1]} {incr i} {
+    set user [ton::2list::get $ALL_READERS $i]
+    if {[ton::2list::get $user username] == $username} {
+      return [ton::2list::get $user id]
+    }
+  }
+}
 
 # === MENU BAR ===
 menu .menubar -tearoff false
@@ -323,11 +333,12 @@ ttk::label .pyre_version_label -text "Pyre version:"
 ttk::label .pyre_version -textvariable PYRE_VERSION
 
 ttk::label .reader_a_label -text "Reader A:"
-ttk::combobox .reader_a_selection -textvariable READER_A -postcommand {
+ttk::combobox .reader_a_selection -justify left -state readonly -postcommand {
   .reader_a_selection configure -values [fetch_readers]
 }
+
 ttk::label .reader_b_label -text "Reader B:"
-ttk::combobox .reader_b_selection -textvariable READER_B -postcommand {
+ttk::combobox .reader_b_selection -justify left -state readonly -postcommand {
   .reader_b_selection configure -values [fetch_readers]
 }
 
