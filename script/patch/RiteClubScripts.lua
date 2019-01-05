@@ -209,6 +209,6 @@ function RiteClubReport(team_a, team_b)
     print(RITE_CLUB_REPORT_PREFIX .. "|" .. "TEAM" .. i .. "ENDHP" .. "|" .. team.PyreHealth)
   end
 
-
+  print(RITE_CLUB_REPORT_PREFIX .. "|" .. "STAGE" .. "|" .. RiteClub.Rite.Stage)
   print(RITE_CLUB_REPORT_PREFIX .. "|STOP")
 end

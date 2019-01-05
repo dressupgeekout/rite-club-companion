@@ -119,7 +119,7 @@ proc pyre_real_location {} {
 }
 
 # XXX require a proper JSON generator
-proc generate_json_payload {team_a team_b} {
+proc generate_json_payload {team_a team_b rite} {
 	set fp [open "/tmp/payload" w+]
 
   puts $fp "{"
@@ -162,7 +162,7 @@ proc generate_json_payload {team_a team_b} {
   puts $fp "    ]"
   puts $fp "  },"
   puts $fp "  \"rite\": {"
-  puts $fp "    \"stage\": 1,"
+  puts $fp "    \"stage\": \"[dict get $rite stage]\","
   puts $fp "    \"masteries_allowed\": 4,"
   puts $fp "    \"duration\": 60"
   puts $fp "  }"
@@ -188,6 +188,7 @@ proc handle_pyre_output {stream} {
       if { $directive == "START" } {
         set team_a [dict create exiles [list]]
         set team_b [dict create exiles [list]]
+        set rite [dict create stage ""]
       }
 
       # Got all rite data, upload it!
@@ -196,13 +197,14 @@ proc handle_pyre_output {stream} {
         # to/from a file >:|
         #
         # XXX This works, just needs to be prettified
-        set fp [generate_json_payload ${team_a} ${team_b}]
+        set fp [generate_json_payload ${team_a} ${team_b} ${rite}]
         set token [::http::geturl "${DATABASE_SERVER}/api/v1/rites" -method POST -type application/json -querychannel $fp]
         close $fp
         ::http::cleanup $token
 
         unset team_a
         unset team_b
+        unset rite
       }
 
       if { $directive == "TEAM1ENDHP" } { dict set team_a endhp $value }
@@ -215,6 +217,9 @@ proc handle_pyre_output {stream} {
       # This performs the transformation: "TeamName02" -> 2
       if { $directive == "TEAM1TRIUMVIRATE" } { dict set team_a triumvirate [regsub {TeamName0?} $value ""] }
       if { $directive == "TEAM2TRIUMVIRATE" } { dict set team_b triumvirate [regsub {TeamName0?} $value ""] }
+
+      # This performs the transformation: "MatchSiteE" -> "E"
+      if { $directive == "STAGE" } { dict set rite stage [regsub {MatchSite} $value ""] }
     }
   }
 }
@@ -222,8 +227,10 @@ proc handle_pyre_output {stream} {
 proc launch_pyre {} {
   global PYRE_LOCATION
   set real_location [pyre_real_location]
+  note "launching Pyre at: ${real_location}"
   set stream [open "|\"${real_location}\""]
   handle_pyre_output $stream
+  note "Pyre quit"
 }
 
 proc ping_database_server {} {
@@ -331,6 +338,8 @@ grid .launch_pyre_button -row 7 -column 0 -columnspan 2 -sticky news
 
 
 # === STARTUP COMMANDS ===
+note "version ${VERSION}"
+
 catch {
   ping_database_server
 }

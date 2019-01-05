@@ -1,6 +1,6 @@
 --- ./Scripts/UIScripts.lua.orig	2019-01-02 15:10:04.000000000 -0800
-+++ ./Scripts/UIScripts.lua	2019-01-02 15:01:36.000000000 -0800
-@@ -3642,6 +3642,18 @@
++++ ./Scripts/UIScripts.lua	2019-01-05 13:10:14.000000000 -0800
+@@ -3642,6 +3642,21 @@
  		LocalMPTeamBName = League[teamBIndex].TeamName
  		LocalMPTeamBPyreHealth = GetConfigOptionValue({ Name = "LocalMPTeamBPyreHealth" })
  
@@ -12,10 +12,29 @@
 +      TeamB = {
 +        Name = LocalMPTeamBName,
 +        StartingPyreHealth = LocalMPTeamBPyreHealth,
-+      }
++      },
++      Rite = {
++        Stage = matchSite,
++      },
 +    }
 +    PersistVariable({Name = "RiteClub"})
 +
  		if GetConfigOptionValue({ Name = "LocalMPUseConstellations" }) then
  			SetMenuOptions({ Name = "LocalMPScreen", Item = "ConstellationsButton", Properties = { Graphic = "GUI\\Screens\\Versus\\CheckBox_Checked", TooltipId = "LocalMP_ConstellationsOn" } })
  		else
+@@ -3715,6 +3730,7 @@
+ 		if GetConfigOptionValue({ Name = "LocalMPMap" }) == "LocalMP_MapRandom" then
+ 			SetupMapRotation()
+ 			mapToLoad = RemoveRandomValue( mapRotation )
++      RiteClub.Rite.Stage = mapToLoad
+ 			if IsEmpty( mapRotation ) then
+ 				mapRotation = nil
+ 			end
+@@ -3748,6 +3764,7 @@
+ 	if mapRequest == "LocalMP_MapRandom" then
+ 		SetupMapRotation()
+ 		mapRequest = RemoveRandomValue( mapRotation )
++    RiteClub.Rite.Stage = mapRequest
+ 		if IsEmpty( mapRotation ) then
+ 			mapRotation = nil
+ 		end
