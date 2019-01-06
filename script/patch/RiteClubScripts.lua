@@ -173,8 +173,6 @@ local serpent = { _NAME = n, _COPYRIGHT = c, _DESCRIPTION = d, _VERSION = v, ser
 
 --[[==== RITE CLUB SCRIPTS ====]]
 
-local RITE_CLUB_REPORT_PREFIX = "RITECLUB"
-
 -- Returns a very pretty string representation of the given element, mostly
 -- for debugging purposes. Normally you want to do this:
 --
@@ -184,17 +182,31 @@ function RiteClubPretty(x)
   return serpent.block(x)
 end
 
--- Writes a bunch of information to the standard output.
-function RiteClubReport(team_a, team_b)
-  print(RITE_CLUB_REPORT_PREFIX .. "|START")
+-- Usage:
+--
+--   RiteClubReportElement({Key="SOMESTRING", Value="optional-value"})
+--
+function RiteClubReportItem(t)
+  local prefix = "RITECLUB"
+  local key = t.Key
+  local value = t.Value
 
+  if value then
+    print(prefix .. "|" .. key .. "|" .. value)
+  else
+    print(prefix .. "|" .. key)
+  end
+end
+
+-- Writes a bunch of information to the standard output.
+function RiteClubFinalReport(team_a, team_b)
   for i, team in ipairs({team_a, team_b}) do
     -- The "team" table always has all of the team's members,so it's up to us
     -- to figure out which ones actualy participated in the Rite which just
     -- occurred.
     for _, exile in pairs(team.TeamBench) do
       if exile.ActiveStatus == "PlayedLastMatch" then
-        print(RITE_CLUB_REPORT_PREFIX .. "|" .. "TEAM" .. i .. "EXILE" .. "|" .. exile.CharacterIndex)
+        RiteClubReportItem({Key="TEAM"..i.."EXILE", Value=exile.CharacterIndex})
       end
     end
 
@@ -204,11 +216,11 @@ function RiteClubReport(team_a, team_b)
       t = RiteClub.TeamB
     end
 
-    print(RITE_CLUB_REPORT_PREFIX .. "|" .. "TEAM" .. i .. "TRIUMVIRATE" .. "|" .. t.Name)
-    print(RITE_CLUB_REPORT_PREFIX .. "|" .. "TEAM" .. i .. "STARTHP" .. "|" .. t.StartingPyreHealth)
-    print(RITE_CLUB_REPORT_PREFIX .. "|" .. "TEAM" .. i .. "ENDHP" .. "|" .. team.PyreHealth)
+    RiteClubReportItem({Key="TEAM"..i.."TRIUMVIRATE", Value=t.Name})
+    RiteClubReportItem({Key="TEAM"..i.."STARTHP", Value=t.StartingPyreHealth})
+    RiteClubReportItem({Key="TEAM"..i.."ENDHP", Value=team.PyreHealth})
   end
 
-  print(RITE_CLUB_REPORT_PREFIX .. "|" .. "STAGE" .. "|" .. RiteClub.Rite.Stage)
-  print(RITE_CLUB_REPORT_PREFIX .. "|STOP")
+  RiteClubReportItem({Key="STAGE", Value=RiteClub.Rite.Stage})
+  RiteClubReportItem({Key="STOP"})
 end
