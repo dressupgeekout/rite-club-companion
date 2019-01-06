@@ -10,7 +10,11 @@ set HERE [file normalize [file dirname $argv0]]
 set IMG_DIR [file join ${HERE} "img"]
 set APP_NAME "Rite Club Companion"
 
-set DATABASE_SERVER "http://localhost:9292/"
+if {[lindex $argv 0] == "--debug"} {
+  set DATABASE_SERVER "http://localhost:9292"
+} else {
+  set DATABASE_SERVER "http://noxalas.net:9292"
+}
 
 set __unset__ "(unset)"
 set __unknown__ "(unknown)"
