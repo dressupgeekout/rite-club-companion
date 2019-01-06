@@ -19,6 +19,7 @@ set PYRE_VERSION ${__unknown__}
 
 set ALL_READERS ""
 set ALL_READER_NAMES [list]
+set RITE_LABEL ""
 
 set fp [open "${HERE}/VERSION" r]
 set VERSION [string trim [gets $fp]]
@@ -121,7 +122,9 @@ proc pyre_real_location {} {
 
 # XXX require a proper JSON generator
 proc generate_json_payload {team_a team_b rite} {
-	set fp [open "/tmp/payload" w+]
+  global RITE_LABEL
+
+  set fp [open "/tmp/payload" w+]
 
   puts $fp "{"
   puts $fp "  \"player_a\": {"
@@ -163,6 +166,7 @@ proc generate_json_payload {team_a team_b rite} {
   puts $fp "    ]"
   puts $fp "  },"
   puts $fp "  \"rite\": {"
+  puts $fp "    \"label\": \"${RITE_LABEL}\","
   puts $fp "    \"stage\": [dict get $rite stage],"
   puts $fp "    \"masteries_allowed\": 4,"
   puts $fp "    \"duration\": 60"
@@ -379,6 +383,9 @@ ttk::combobox .reader_b_selection -justify left -state readonly -postcommand {
   .reader_b_selection configure -values [fetch_readers]
 }
 
+ttk::label .rite_label_label -text "Label:"
+ttk::entry .rite_label_input -state normal -justify left -textvariable RITE_LABEL
+
 ttk::button .launch_pyre_button -text "Launch!" -command launch_pyre
 
 
@@ -386,6 +393,7 @@ ttk::button .launch_pyre_button -text "Launch!" -command launch_pyre
 grid .title_label_img -row 0 -column 0 -columnspan 2 -sticky news
 grid .button1 -row 1 -column 0  -sticky news
 grid .choose_pyre_button -row 2 -column 0 -sticky news
+
 grid .pyre_location_label -row 3 -column 0 -sticky news
 grid .pyre_location -row 3 -column 1 -sticky news
 grid .pyre_version_label -row 4 -column 0 -sticky news
@@ -395,7 +403,11 @@ grid .reader_a_label -row 5 -column 0 -sticky news
 grid .reader_a_selection -row 5 -column 1 -sticky news
 grid .reader_b_label -row 6 -column 0 -sticky news
 grid .reader_b_selection -row 6 -column 1 -sticky news
-grid .launch_pyre_button -row 7 -column 0 -columnspan 2 -sticky news
+
+grid .rite_label_label -row 7 -column 0 -sticky news
+grid .rite_label_input -row 7 -column 1 -sticky news
+
+grid .launch_pyre_button -row 8 -column 0 -columnspan 2 -sticky news
 
 
 # === STARTUP COMMANDS ===
