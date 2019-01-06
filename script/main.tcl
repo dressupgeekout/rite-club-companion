@@ -173,7 +173,7 @@ proc generate_json_payload {team_a team_b rite} {
   puts $fp "    \"label\": \"${RITE_LABEL}\","
   puts $fp "    \"stage\": [dict get $rite stage],"
   puts $fp "    \"masteries_allowed\": 4,"
-  puts $fp "    \"duration\": 60"
+  puts $fp "    \"duration\": [dict get $rite duration]"
   puts $fp "  }"
   puts $fp "}"
 
@@ -233,6 +233,8 @@ proc handle_pyre_output {stream} {
         unset rite
       }
 
+      if { $directive == "RITECOMMENCED" } { dict set rite commence_time [clock seconds] }
+      if { $directive == "RITECONCLUDED" } { dict set rite duration [expr [clock seconds] - [dict get $rite commence_time]] }
       if { $directive == "TEAM1ENDHP" } { dict set team_a endhp $value }
       if { $directive == "TEAM2ENDHP" } { dict set team_b endhp $value }
       if { $directive == "TEAM1EXILE" } { dict lappend team_a exiles $value }
