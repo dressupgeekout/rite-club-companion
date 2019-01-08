@@ -173,6 +173,8 @@ local serpent = { _NAME = n, _COPYRIGHT = c, _DESCRIPTION = d, _VERSION = v, ser
 
 --[[==== RITE CLUB SCRIPTS ====]]
 
+RiteClubScriptsVersion = 1
+
 -- Returns a very pretty string representation of the given element, mostly
 -- for debugging purposes. Normally you want to do this:
 --
