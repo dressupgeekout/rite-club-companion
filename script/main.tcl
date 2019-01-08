@@ -118,6 +118,12 @@ proc get_pyre_version {} {
   } else {
     warning "scripts location is not a directory: $scripts_location"
   }
+
+  if [pyre_is_patched] {
+    note "Pyre is appropriately patched"
+  } else {
+    note "Pyre is NOT appropriately patched"
+  }
 }
 
 # A user on macOS will provide the path to the .app bundle, but what we
@@ -136,6 +142,15 @@ proc pyre_real_location {} {
 # has pointed to the Pyre main executable.
 proc pyre_scripts_location {} {
   return [file join [file dirname [pyre_real_location]] "Content" "Scripts"]
+}
+
+# XXX Should make these determinations with SHA sums or something
+proc pyre_is_patched {} {
+  if {![file isfile [file join [pyre_scripts_location] "RiteClubScripts.lua"]]} {
+    return false
+  }
+
+  return true
 }
 
 # XXX require a proper JSON generator
