@@ -59,16 +59,7 @@ proc destroy_about_window {} {
 proc show_about_window {} {
   global APP_NAME
   global VERSION
-
-  if [info exists .about_window] {} else { toplevel .about_window }
-  wm title .about_window "About ${APP_NAME}"
-  wm geometry .about_window "=300x150"
-
-  ttk::label .about_window.version_text -text "${APP_NAME} ${VERSION}\nDeveloped by Charlotte Koch"
-  ttk::button .about_window.ok_button -text "OK" -command destroy_about_window
-
-  pack .about_window.version_text
-  pack .about_window.ok_button
+  tk_messageBox -type ok -message "${APP_NAME} ${VERSION}\nDeveloped by Charlotte Koch"
 }
 
 # Can return: "macOS", "Windows" or "Linux".
