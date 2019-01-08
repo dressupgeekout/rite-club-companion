@@ -110,6 +110,14 @@ proc get_pyre_version {} {
     # XXX should error!
     warning "can't determine Pyre version!"
   }
+
+  set scripts_location [pyre_scripts_location]
+
+  if {[file isdirectory $scripts_location]} {
+    note "Pyre scripts location: $scripts_location"
+  } else {
+    warning "scripts location is not a directory: $scripts_location"
+  }
 }
 
 # A user on macOS will provide the path to the .app bundle, but what we
@@ -122,6 +130,12 @@ proc pyre_real_location {} {
   } else {
     return $PYRE_LOCATION
   }
+}
+
+# Returns the path to Pyre's collection of Lua scripts, provided the user
+# has pointed to the Pyre main executable.
+proc pyre_scripts_location {} {
+  return [file join [file dirname [pyre_real_location]] "Content" "Scripts"]
 }
 
 # XXX require a proper JSON generator
