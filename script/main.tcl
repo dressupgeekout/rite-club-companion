@@ -8,6 +8,7 @@ package require platform
 # === GLOBALS ===
 set HERE [file normalize [file dirname $argv0]]
 set IMG_DIR [file join ${HERE} "img"]
+set PATCHDIR [file join ${HERE} "patch"]
 set APP_NAME "Rite Club Companion"
 
 if {[lindex $argv 0] == "--debug"} {
@@ -142,6 +143,18 @@ proc pyre_is_patched {} {
   }
 
   return true
+}
+
+# Actually applies the patches to Pyre.
+proc patch_pyre {} {
+  global PATCHDIR
+
+  set plain_copies [list RiteClubScripts.lua]
+
+  foreach {f} $plain_copies {
+    note "COPY $f -> [pyre_scripts_location]"
+    file copy [file join $PATCHDIR $f] [pyre_scripts_location]
+  }
 }
 
 # XXX require a proper JSON generator
@@ -303,6 +316,10 @@ proc launch_pyre {} {
 
   if {![pyre_preflight_checks]} {
     return false
+  }
+
+  if {![pyre_is_patched]} {
+    patch_pyre
   }
 
   set real_location [pyre_real_location]
