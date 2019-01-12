@@ -44,6 +44,10 @@ proc warning {msg} {
   note "WARNING: ${msg}"
 }
 
+proc warning_dialog {msg} {
+  tk_messageBox -message $msg -type ok
+}
+
 # === MAIN WINDOW SETUP ===
 wm title . ${APP_NAME}
 wm iconphoto . -default pyre_logo
@@ -288,23 +292,25 @@ proc pyre_preflight_checks {} {
   set reader_a [.reader_a_selection get]
   set reader_b [.reader_b_selection get]
 
+  set prefix "Can't launch Pyre."
+
   if {$PYRE_LOCATION == ${__unset__}} {
-    note "You haven't noted where Pyre is located!"
+    warning_dialog "${prefix} You haven't noted where Pyre is located!"
     return false
   }
 
   if {$reader_a == ""} {
-    note "Reader A is not selected"
+    warning_dialog "${prefix} Reader A is not selected"
     return false
   }
 
   if {$reader_b == ""} {
-    note "Reader B is not selected"
+    warning_dialog "${prefix} Reader B is not selected"
     return false
   }
 
   if {$reader_a == $reader_b} {
-    note "${reader_a} cannot compete against themselves!"
+    warning_dialog "${prefix} ${reader_a} cannot compete against themselves!"
     return false
   }
 
@@ -339,7 +345,7 @@ proc ping_database_server {} {
     note "ping ${DATABASE_SERVER} OK"
   } else  {
     # XXX is an error
-    wearning "couldn't ping ${DATABASE_SERVER}"
+    warning_dialog "Couldn't ping ${DATABASE_SERVER}"
   }
 }
 
@@ -358,10 +364,10 @@ proc fetch_readers {} {
 
   if { $status_code == 200 } {
     set res_body [::http::data $token]
-    note "got usernames: ${res_body}"
+    note "Got usernames: ${res_body}"
     set ALL_READERS [namespace eval ton::2list [ton::json2ton $res_body]]
   } else {
-    warning "couldn't get usernames!"
+    warning_dialog "Couldn't get usernames!"
     ::http::cleanup $token
     return $result
   }
