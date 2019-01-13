@@ -150,6 +150,17 @@ proc pyre_is_patched {} {
   return false
 }
 
+# Wrapper around GNU patch(1).
+proc patch {origfile patchfile} {
+ # XXX set patchutil [file normalize [file join $HERE ".." ".." "bin" "patch"]]
+ set patchutil /tmp/patch-2.7.6/src/patch
+
+ set stream [open "|${patchutil} -uN ${origfile} ${patchfile}"]
+ while {[gets $stream line] >= 0} {
+   note "(patch) $line"
+ }
+}
+
 # Actually applies the patches to Pyre. Returns true if successful, or false if
 # there was a problem.
 proc patch_pyre {} {
@@ -183,21 +194,14 @@ proc patch_pyre {} {
 
   # OK, let's simply copy over the "new" files.
   foreach {f} $plain_copies {
-    if {![file exists [file join [pyre_scripts_location] $f]]} {
-      note "COPY $f -> [pyre_scripts_location]"
-      file copy [file join $PATCHDIR $f] [pyre_scripts_location]
-    }
+    note "COPY $f -> [pyre_scripts_location]"
+    file copy -force [file join $PATCHDIR $f] [pyre_scripts_location]
   }
 
   # And then we'll actually apply the patches.
-  #set patch [file normalize [file join $HERE ".." ".." "bin" "patch"]]
-  #set patch /tmp/patch-2.7.6/src/patch
-
-  #set stream [open "|${patch} -uN [file join [pyre_scripts_location]]"]
-  #while {[gets $stream line] >= 0} {
-  #  puts $line
-  #}
-  #close $stream
+  foreach {f} $diff_basenames {
+    patch [file join [pyre_scripts_location] "${f}.lua"] [file join $PATCHDIR "patch-Scripts_${f}.lua.diff"]
+  }
 
   return true
 }
