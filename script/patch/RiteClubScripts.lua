@@ -223,6 +223,7 @@ function RiteClubFinalReport(team_a, team_b)
     RiteClubReportItem({Key="TEAM"..i.."ENDHP", Value=team.PyreHealth})
   end
 
+  RiteClubReportItem({Key="MASTERIES", Value=RiteClub.Rite.MasteriesAllowed})
   RiteClubReportItem({Key="TALISMANS", Value=tostring(RiteClub.Rite.TalismansEnabled)})
   RiteClubReportItem({Key="STAGE", Value=RiteClub.Rite.Stage})
   RiteClubReportItem({Key="STOP"})
