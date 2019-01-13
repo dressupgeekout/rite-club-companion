@@ -255,7 +255,7 @@ proc generate_json_payload {team_a team_b rite} {
   puts $fp "    \"label\": \"${RITE_LABEL}\","
   puts $fp "    \"stage\": [dict get $rite stage],"
   puts $fp "    \"masteries_allowed\": 4,"
-  puts $fp "    \"duration\": [dict get $rite duration]",
+  puts $fp "    \"duration\": [dict get $rite duration],"
   puts $fp "    \"talismans_enabled\": [dict get $rite talismans_enabled]"
   puts $fp "  }"
   puts $fp "}"
