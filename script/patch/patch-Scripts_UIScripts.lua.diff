@@ -1,8 +1,8 @@
---- ./Scripts/UIScripts.lua.orig	2019-01-02 15:10:04.000000000 -0800
-+++ ./Scripts/UIScripts.lua	2019-01-05 13:10:14.000000000 -0800
-@@ -3642,6 +3642,21 @@
- 		LocalMPTeamBName = League[teamBIndex].TeamName
- 		LocalMPTeamBPyreHealth = GetConfigOptionValue({ Name = "LocalMPTeamBPyreHealth" })
+--- ./Scripts/UIScripts.lua.orig	2019-01-13 14:41:56.000000000 -0800
++++ ./Scripts/UIScripts.lua	2019-01-13 14:19:39.000000000 -0800
+@@ -3650,6 +3650,21 @@
+ 
+ 		SetMenuOptions({ Name = "LocalMPScreen", Properties = { Run = "MarkTooltipDirty" } })
  
 +    RiteClub = {
 +      TeamA = {
@@ -15,13 +15,13 @@
 +      },
 +      Rite = {
 +        Stage = matchSite,
++        TalismansEnabled = GetConfigOptionValue({Name="LocalMPUseItems"}),
 +      },
 +    }
 +    PersistVariable({Name = "RiteClub"})
-+
- 		if GetConfigOptionValue({ Name = "LocalMPUseConstellations" }) then
- 			SetMenuOptions({ Name = "LocalMPScreen", Item = "ConstellationsButton", Properties = { Graphic = "GUI\\Screens\\Versus\\CheckBox_Checked", TooltipId = "LocalMP_ConstellationsOn" } })
- 		else
+ 	end
+ }
+ 
 @@ -3715,6 +3730,7 @@
  		if GetConfigOptionValue({ Name = "LocalMPMap" }) == "LocalMP_MapRandom" then
  			SetupMapRotation()

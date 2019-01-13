@@ -255,7 +255,8 @@ proc generate_json_payload {team_a team_b rite} {
   puts $fp "    \"label\": \"${RITE_LABEL}\","
   puts $fp "    \"stage\": [dict get $rite stage],"
   puts $fp "    \"masteries_allowed\": 4,"
-  puts $fp "    \"duration\": [dict get $rite duration]"
+  puts $fp "    \"duration\": [dict get $rite duration]",
+  puts $fp "    \"talismans_enabled\": [dict get $rite talismans_enabled]"
   puts $fp "  }"
   puts $fp "}"
 
@@ -325,6 +326,7 @@ proc handle_pyre_output {stream} {
       if { $directive == "TEAM2STARTHP" } { dict set team_b starthp $value }
       if { $directive == "TEAM1TRIUMVIRATE" } { dict set team_a triumvirate [team_key_to_index $value] }
       if { $directive == "TEAM2TRIUMVIRATE" } { dict set team_b triumvirate [team_key_to_index $value] }
+      if { $directive == "TALISMANS" } { dict set rite talismans_enabled $value }
       if { $directive == "STAGE" } { dict set rite stage [match_site_key_to_index $value] }
     }
   }

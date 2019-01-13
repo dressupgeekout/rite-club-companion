@@ -1,0 +1,14 @@
+#!/bin/sh
+set -ex
+
+HERE=$(pwd)
+ORIGCONTENTDIR=/Applications/Pyre.app/Contents/MacOS/Content
+CONTENTDIR=~/Applications/Pyre.app/Contents/MacOS/Content
+
+pushd ${CONTENTDIR}
+  for s in MatchScripts UIScripts; do
+    cp ${ORIGCONTENTDIR}/Scripts/$s.lua ./Scripts/$s.lua.orig
+    diff -bu ./Scripts/$s.lua.orig ./Scripts/$s.lua > ${HERE}/script/patch/patch-Scripts_$s.lua.diff || :
+  done
+  cp ./Scripts/RiteClubScripts.lua ${HERE}/script/patch
+popd
