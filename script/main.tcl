@@ -455,7 +455,7 @@ menu .menubar.xxx -tearoff false
 
 
 # === XXX ===
-ttk::button .button1 -text "click me" -command show_about_window
+ttk::button .button1 -text "About..." -command show_about_window
 
 proc set_pyre_location {} {
   global PYRE_LOCATION
