@@ -1,5 +1,5 @@
---- ./Scripts/MatchScripts.lua.orig	2019-01-13 21:23:41.000000000 -0800
-+++ ./Scripts/MatchScripts.lua	2019-01-13 21:23:15.000000000 -0800
+--- ./Scripts/MatchScripts.lua.orig	2019-01-13 21:40:24.000000000 -0800
++++ ./Scripts/MatchScripts.lua	2019-01-13 21:40:17.000000000 -0800
 @@ -15,6 +15,7 @@
  Import "MatchAI"
  Import "MatchCamera"
