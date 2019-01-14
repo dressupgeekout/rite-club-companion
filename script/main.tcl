@@ -160,7 +160,7 @@ proc pyre_is_patched {} {
 proc patch {origfile patchfile} {
   global HERE
 
-  set patchutil [file normalize [file join $HERE ".." ".." "bin" "gpatsch"]]
+  set patchutil [file normalize [file join $HERE ".." "bin" "gpatsch"]]
   if {[my_platform] == "Windows"} {set patchutil "${patchutil}.exe"}
 
   if {![file exists $patchutil]} {
