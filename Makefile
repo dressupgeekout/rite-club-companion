@@ -34,24 +34,25 @@ endif # ifeq uname Darwin
 endif # ifndef PLATFORM
 
 archive_basename=	rite_club_companion-$(VERSION)
+gpatch_bin_basename=	gpatsch
 
 ifeq ($(PLATFORM),macosx)
 GNU_PATCH_DIST=	$(GNU_PATCH_SOURCE_TARBALL)
-GPATCH_BIN=	gpatsch
+GPATCH_BIN=	$(gpatch_bin_basename)
 # XXX WISH_BIN=
 archive=	$(archive_basename)-macosx.tar.gz
 launch_script=	rite_club_companion
 endif
 ifeq ($(PLATFORM),unix)
 GNU_PATCH_DIST=	$(GNU_PATCH_SOURCE_TARBALL)
-GPATCH_BIN=	gpatsch
+GPATCH_BIN=	$(gpatch_bin_basename)
 # XXX WISH_BIN=
 archive=	$(archive_basename)-linux.tar.gz
 launch_script=	rite_club_companion
 endif
 ifeq ($(PLATFORM),win)
 GNU_PATCH_DIST=	$(GNUWIN_PATCH_ZIPBALL)
-GPATCH_BIN=	gpatsch.exe
+GPATCH_BIN=	$(gpatch_bin_basename).exe
 WISH_BIN=	wish86s.exe
 archive=	$(archive_basename)-windows.zip
 launch_script=	"Rite Club Companion.bat"
@@ -61,6 +62,7 @@ workdir:=		work.$(PLATFORM)
 tcl_workdir:=		$(workdir)/tcl$(TCL_VERSION)/$(PLATFORM)
 # XXX bleh vv
 tk_workdir:=		$(workdir)/tk$(TCL_VERSION)/$(PLATFORM)
+gpatch_workdir:=	$(workdir)/$(subst .tar.xz,,$(notdir $(GNU_PATCH_SOURCE_URL)))
 archive_workdir:=	$(workdir)/$(archive_basename)
 
 tcl_configure_flags=	# defined
@@ -162,7 +164,9 @@ ifeq ($(PLATFORM),win)
 		cp $${dir}/bin/patch.exe $(workdir)/$(GPATCH_BIN);	\
 		rm -rf $${dir};
 else
-# XXX
+	$(TAR) -x -f $< -C $(workdir)
+	cd $(gpatch_workdir) && ./configure $(gpatch_configure_flags)
+	$(MAKE) -C $(gpatch_workdir)
 endif
 	@touch $@
 
@@ -184,6 +188,7 @@ else
 	echo '#!/bin/sh' > $(archive_workdir)/$(launch_script)
 	echo 'set -ex' >> $(archive_workdir)/$(launch_script)
 	echo './bin/$(WISH_BIN) ./script/main.tcl' >> $(archive_workdir)/$(launch_script)
+	cp $(gpatch_workdir)/src/patch $(archive_workdir)/bin/$(GPATCH_BIN)
 	chmod +x $(archive_workdir)/$(launch_script)
 	tar -c -f $@ -C $(dir $(archive_workdir)) $(notdir $(archive_workdir))
 endif
