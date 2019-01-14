@@ -1,25 +1,25 @@
---- ./Scripts/UIScripts.lua.orig	2019-01-13 21:23:41.000000000 -0800
-+++ ./Scripts/UIScripts.lua	2019-01-13 21:22:21.000000000 -0800
+--- ./Scripts/UIScripts.lua.orig	2019-01-13 21:37:10.000000000 -0800
++++ ./Scripts/UIScripts.lua	2019-01-13 21:37:05.000000000 -0800
 @@ -3650,6 +3650,22 @@
  
  		SetMenuOptions({ Name = "LocalMPScreen", Properties = { Run = "MarkTooltipDirty" } })
  
-+    RiteClub = {
-+      TeamA = {
-+        Name = LocalMPTeamAName,
-+        StartingPyreHealth = LocalMPTeamAPyreHealth,
-+      },
-+      TeamB = {
-+        Name = LocalMPTeamBName,
-+        StartingPyreHealth = LocalMPTeamBPyreHealth,
-+      },
-+      Rite = {
-+        Stage = matchSite,
-+        TalismansEnabled = GetConfigOptionValue({Name="LocalMPUseItems"}),
-+        MasteriesAllowed = (characterLevel-1),
-+      },
-+    }
-+    PersistVariable({Name = "RiteClub"})
++		RiteClub = {
++			TeamA = {
++				Name = LocalMPTeamAName,
++				StartingPyreHealth = LocalMPTeamAPyreHealth,
++			},
++			TeamB = {
++				Name = LocalMPTeamBName,
++				StartingPyreHealth = LocalMPTeamBPyreHealth,
++			},
++			Rite = {
++				Stage = matchSite,
++				TalismansEnabled = GetConfigOptionValue({Name="LocalMPUseItems"}),
++				MasteriesAllowed = (characterLevel-1),
++			},
++		}
++		PersistVariable({Name = "RiteClub"})
  	end
  }
  
