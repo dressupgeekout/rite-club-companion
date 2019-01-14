@@ -164,7 +164,7 @@ proc patch {origfile patchfile} {
   if {[my_platform] == "Windows"} {set patchutil "${patchutil}.exe"}
 
   if {![file exists $patchutil]} {
-    set patchutil "patch"
+    set patchutil "/usr/bin/patch"
   }
 
   if {![file exists $patchutil]} {
