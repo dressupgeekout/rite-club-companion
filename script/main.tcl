@@ -75,7 +75,7 @@ proc my_platform {} {
 
   if { $word == "macosx"} {
     return "macOS"
-  } elseif { $word == "win" } {
+  } elseif { $word == "win32" } {
     return "Windows"
   } else {
     return "Linux"
@@ -137,7 +137,13 @@ proc pyre_real_location {} {
 # Returns the path to Pyre's collection of Lua scripts, provided the user
 # has pointed to the Pyre main executable.
 proc pyre_scripts_location {} {
-  return [file join [file dirname [pyre_real_location]] "Content" "Scripts"]
+  # If Windows and GOG, then the Pyre exe is in a "x64" subdirectory, so we
+  # need to travel back up.
+  if {[my_platform] == "Windows"} {
+    return [file join [file dirname [pyre_real_location]] ".." "Content" "Scripts"]
+  } else {
+    return [file join [file dirname [pyre_real_location]] "Content" "Scripts"]
+  }
 }
 
 # XXX Should make these determinations with SHA sums or something
