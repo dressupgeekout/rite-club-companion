@@ -176,12 +176,14 @@ local serpent = { _NAME = n, _COPYRIGHT = c, _DESCRIPTION = d, _VERSION = v, ser
 RiteClubScriptsVersion = 1
 
 -- Returns a very pretty string representation of the given element, mostly
--- for debugging purposes. Normally you want to do this:
---
---   print(RiteClubPretty(some_table))
---
+-- for debugging purposes. Normally you want RiteClubPrettyPrint() instead.
 function RiteClubPretty(x)
   return serpent.block(x)
+end
+
+-- Makes a pretty string for the given element and then writes it to stdout.
+function RiteClubPrettyPrint(x)
+  print(RiteClubPretty(x))
 end
 
 -- Usage:
