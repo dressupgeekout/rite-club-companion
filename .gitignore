@@ -2,6 +2,7 @@
 *.swo
 *.swp
 *.tar.gz
+*.tar.xz
 *.zip
 .gpatch-*-done
 .tcl-*-done
