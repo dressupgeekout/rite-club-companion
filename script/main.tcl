@@ -172,7 +172,7 @@ proc patch {origfile patchfile} {
     return false
   }
 
-  set stream [open "|${patchutil} -uN ${origfile} ${patchfile}"]
+  set stream [open "|${patchutil} -uN \"${origfile}\" \"${patchfile}\""]
   while {[gets $stream line] >= 0} {
     note "(patch) $line"
   }
