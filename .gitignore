@@ -3,6 +3,7 @@
 *.swp
 *.tar.gz
 *.zip
+.gpatch-*-done
 .tcl-*-done
 .tk-*-done
 work.*/**

@@ -9,11 +9,15 @@ TK_VERSION?=	8.6.9.1
 
 TCL_SOURCE_URL?=	https://prdownloads.sourceforge.net/tcl/tcl$(TCL_VERSION)-src.tar.gz
 TK_SOURCE_URL?=		https://prdownloads.sourceforge.net/tcl/tk$(TK_VERSION)-src.tar.gz
+GNUWIN_PATCH_URL?=	https://sourceforge.net/projects/gnuwin32/files/patch/2.5.9-7/patch-2.5.9-7-bin.zip
+GNU_PATCH_SOURCE_URL?=	https://ftp.gnu.org/gnu/patch/patch-2.7.6.tar.xz
 
 distdir:=	dist
 
-TCL_SOURCE_TARBALL=	$(distdir)/$(notdir $(TCL_SOURCE_URL))
-TK_SOURCE_TARBALL=	$(distdir)/$(notdir $(TK_SOURCE_URL))
+TCL_SOURCE_TARBALL=		$(distdir)/$(notdir $(TCL_SOURCE_URL))
+TK_SOURCE_TARBALL=		$(distdir)/$(notdir $(TK_SOURCE_URL))
+GNU_PATCH_SOURCE_TARBALL=	$(distdir)/$(notdir $(GNU_PATCH_SOURCE_URL))
+GNUWIN_PATCH_ZIPBALL=		$(distdir)/$(notdir $(GNUWIN_PATCH_URL))
 
 MINGW_TRIPLE?=	x86_64-w64-mingw32
 
@@ -32,16 +36,22 @@ endif # ifndef PLATFORM
 archive_basename=	rite_club_companion-$(VERSION)
 
 ifeq ($(PLATFORM),macosx)
+GNU_PATCH_DIST=	$(GNU_PATCH_SOURCE_TARBALL)
+GPATCH_BIN=	gpatsch
 # XXX WISH_BIN=
 archive=	$(archive_basename)-macosx.tar.gz
 launch_script=	rite_club_companion
 endif
 ifeq ($(PLATFORM),unix)
+GNU_PATCH_DIST=	$(GNU_PATCH_SOURCE_TARBALL)
+GPATCH_BIN=	gpatsch
 # XXX WISH_BIN=
 archive=	$(archive_basename)-linux.tar.gz
 launch_script=	rite_club_companion
 endif
 ifeq ($(PLATFORM),win)
+GNU_PATCH_DIST=	$(GNUWIN_PATCH_ZIPBALL)
+GPATCH_BIN=	gpatsch.exe
 WISH_BIN=	wish86s.exe
 archive=	$(archive_basename)-windows.zip
 launch_script=	"Rite Club Companion.bat"
@@ -70,8 +80,14 @@ ifeq ($(PLATFORM),win)
 tk_configure_flags+=	--host=$(MINGW_TRIPLE)
 endif
 
+ifneq ($(PLATFORM),win)
+gpatch_configure_flags=		# defined
+gpatch_configure_flags+=	--disable-shared
+endif
+
 tcl_done=	.tcl-$(PLATFORM)-done
 tk_done=	.tk-$(PLATFORM)-done
+gpatch_done=	.gpatch-$(PLATFORM)-done
 
 ######### ######### ######### #########
 
@@ -82,6 +98,7 @@ help:
 	@echo - fetch
 	@echo - tcl PLATFORM=macosx\|unix\|windows
 	@echo - tk PLATFORM=macosx\|unix\|windows
+	@echo - gpatch PLATFORM=macosx\|unix\|windows
 	@echo - archive PLATFORM=macosx\|unix\|windows
 	@echo - clean PLATFORM=macosx\|unix\|windows
 
@@ -89,7 +106,7 @@ help:
 all: $(archive)
 
 .PHONY: fetch
-fetch: $(TCL_SOURCE_TARBALL) $(TK_SOURCE_TARBALL)
+fetch: $(TCL_SOURCE_TARBALL) $(TK_SOURCE_TARBALL) $(GNU_PATCH_DIST)
 
 $(TCL_SOURCE_TARBALL): | $(distdir)
 	curl -L $(TCL_SOURCE_URL) > $@
@@ -99,6 +116,16 @@ $(TCL_SOURCE_TARBALL): | $(distdir)
 $(TK_SOURCE_TARBALL): | $(distdir)
 	curl -L $(TK_SOURCE_URL) > $@
 	cd $(distdir) && shasum -a256 -c tk.shasum
+	@touch $@
+
+$(GNU_PATCH_SOURCE_TARBALL): | $(distdir)
+	curl -L $(GNU_PATCH_SOURCE_URL) > $@
+	cd $(distdir) && shasum -a256 -c gpatch.shasum
+	@touch $@
+
+$(GNUWIN_PATCH_ZIPBALL): | $(distdir)
+	curl -L $(GNUWIN_PATCH_URL) > $@
+	cd $(distdir) && shasum -a256 -c gnuwinpatch.shasum
 	@touch $@
 
 .PHONY: tcl
@@ -119,16 +146,37 @@ $(tk_done): $(TK_SOURCE_TARBALL) $(tcl_done) | $(workdir)
 	$(MAKE) -C $(tk_workdir)
 	@touch $@
 
+.PHONY: gpatch
+gpatch: $(gpatch_done)
+
+# Even though mingw-w64 is available to us, we're not going to cross-compile
+# GNU patch(1) (there are build errors I'm not sure how to fix, at the
+# absolute least). So if we're trying to make the Windows distribution, then
+# simply copy the precompiled patch.exe... and then rename it to something
+# silly because of a Windows 7+ "security feature" where executables with
+# the word "patch" in their names require elevated privileges.
+$(gpatch_done): $(GNU_PATCH_DIST) | $(workdir)
+ifeq ($(PLATFORM),win)
+	dir=$$(mktemp -d /tmp/gpatch.XXXXXX);				\
+		(cd $${dir} && unzip $(CURDIR)/$<);			\
+		cp $${dir}/bin/patch.exe $(workdir)/$(GPATCH_BIN);	\
+		rm -rf $${dir};
+else
+# XXX
+endif
+	@touch $@
+
 .PHONY: archive
 archive: $(archive)
 
-$(archive): $(tk_done) $(shell find script -type f) | $(archive_workdir)
+$(archive): $(tk_done) $(gpatch_done) $(shell find script -type f) | $(archive_workdir)
 	mkdir -p $(archive_workdir)/bin
 	cp -r $(CURDIR)/script $(archive_workdir)
 	cp -r $(tcl_workdir)/../library $(archive_workdir)
 	cp -r $(tk_workdir)/../library $(archive_workdir)/library/tk8.6
 ifeq ($(PLATFORM),win)
 	cp $(tk_workdir)/$(WISH_BIN) $(archive_workdir)/bin
+	cp $(workdir)/$(GPATCH_BIN) $(archive_workdir)/bin
 	echo 'bin\\$(WISH_BIN) script\\main.tcl' > $(archive_workdir)/$(launch_script)
 	cd $(dir $(archive_workdir)) && zip -r $@ $(notdir $(archive_workdir))
 	mv $(dir $(archive_workdir))/$@ $@
@@ -142,7 +190,7 @@ endif
 
 .PHONY: clean
 clean:
-	rm -rf $(workdir) $(tcl_done) $(tk_done)
+	rm -rf $(workdir) $(tcl_done) $(tk_done) $(gpatch_done)
 
 ######### ######### ######### #########
 
