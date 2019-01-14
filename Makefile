@@ -98,11 +98,11 @@ help:
 	@echo Available targets:
 	@echo - all
 	@echo - fetch
-	@echo - tcl PLATFORM=macosx\|unix\|windows
-	@echo - tk PLATFORM=macosx\|unix\|windows
-	@echo - gpatch PLATFORM=macosx\|unix\|windows
-	@echo - archive PLATFORM=macosx\|unix\|windows
-	@echo - clean PLATFORM=macosx\|unix\|windows
+	@echo - tcl PLATFORM=macosx\|unix\|win
+	@echo - tk PLATFORM=macosx\|unix\|win
+	@echo - gpatch PLATFORM=macosx\|unix\|win
+	@echo - archive PLATFORM=macosx\|unix\|win
+	@echo - clean PLATFORM=macosx\|unix\|win
 
 .PHONY: all
 all: $(archive)
