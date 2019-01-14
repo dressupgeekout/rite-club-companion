@@ -158,13 +158,24 @@ proc pyre_is_patched {} {
 
 # Wrapper around GNU patch(1).
 proc patch {origfile patchfile} {
- # XXX set patchutil [file normalize [file join $HERE ".." ".." "bin" "patch"]]
- set patchutil /tmp/patch-2.7.6/src/patch
+  global HERE
 
- set stream [open "|${patchutil} -uN ${origfile} ${patchfile}"]
- while {[gets $stream line] >= 0} {
-   note "(patch) $line"
- }
+  set patchutil [file normalize [file join $HERE ".." ".." "bin" "gpatsch"]]
+  if {[my_platform] == "Windows"} {set patchutil "${patchutil}.exe"}
+
+  if {![file exists $patchutil]} {
+    set patchutil "patch"
+  }
+
+  if {![file exists $patchutil]} {
+    warning_dialog "Cannot find patching tool!"
+    return false
+  }
+
+  set stream [open "|${patchutil} -uN ${origfile} ${patchfile}"]
+  while {[gets $stream line] >= 0} {
+    note "(patch) $line"
+  }
 }
 
 # Actually applies the patches to Pyre. Returns true if successful, or false if
