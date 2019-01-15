@@ -231,7 +231,7 @@ proc generate_json_payload {team_a team_b rite} {
   global RITE_LABEL
 
   set fp [file tempfile tempfile_path]
-  note $tempfile_path
+  note "Wrting JSON to: $tempfile_path"
 
   puts $fp "{"
   puts $fp "  \"player_a\": {"
