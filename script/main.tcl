@@ -382,6 +382,9 @@ proc pyre_preflight_checks {} {
   return true
 }
 
+# On Windows, Pyre gets confused if the working directory is not where the
+# main executable is, so it's more portable to change the working directory
+# for this purpose.
 proc launch_pyre {} {
   global PYRE_LOCATION
 
@@ -396,10 +399,14 @@ proc launch_pyre {} {
     }
   }
 
+  set back_here [pwd]
+
   set real_location [pyre_real_location]
   note "launching Pyre at: ${real_location}"
+  cd [file dirname $real_location]
   set stream [open "|\"${real_location}\""]
   handle_pyre_output $stream
+  cd $back_here
   note "Pyre quit"
 }
 
