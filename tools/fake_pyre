@@ -1,0 +1,26 @@
+#!/bin/sh
+
+report() {
+  echo "RITECLUB|$1"
+}
+
+report "START"
+report "RITECOMMENCED"
+sleep 2
+report "RITECONCLUDED"
+report "TEAM1EXILE|1"
+report "TEAM1EXILE|2"
+report "TEAM1EXILE|3"
+report "TEAM2EXILE|17"
+report "TEAM2EXILE|18"
+report "TEAM2EXILE|19"
+report "TEAM1STARTHP|100"
+report "TEAM2STARTHP|100"
+report "TEAM1ENDHP|50"
+report "TEAM2ENDHP|0"
+report "TEAM1TRIUMVIRATE|TeamName02"
+report "TEAM2TRIUMVIRATE|TeamName09"
+report "STAGE|MatchSiteE"
+report "MASTERIES|-1"
+report "TALISMANS|false"
+report "STOP"

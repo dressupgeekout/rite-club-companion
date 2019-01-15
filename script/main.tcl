@@ -11,11 +11,8 @@ set IMG_DIR [file join ${HERE} "img"]
 set PATCHDIR [file join ${HERE} "patch"]
 set APP_NAME "Rite Club Companion"
 
-if {[lindex $argv 0] == "--debug"} {
-  set DATABASE_SERVER "http://localhost:9292"
-} else {
-  set DATABASE_SERVER "http://noxalas.net:9292"
-}
+set DATABASE_SERVER "http://noxalas.net:9292"
+set NO_PATCH false
 
 set __unset__ "(unset)"
 set __unknown__ "(unknown)"
@@ -177,6 +174,9 @@ proc patch {origfile patchfile} {
 # Actually applies the patches to Pyre. Returns true if successful, or false if
 # there was a problem.
 proc patch_pyre {} {
+  global NO_PATCH
+  if $NO_PATCH { return true }
+
   global HERE
   global PATCHDIR
 
@@ -534,6 +534,11 @@ grid .launch_pyre_button -row 8 -column 0 -columnspan 2 -sticky news
 
 # === STARTUP COMMANDS ===
 note "version ${VERSION}"
+
+foreach {arg} $argv {
+  if {$arg == "--debug"} { set DATABASE_SERVER "http://localhost:9292" }
+  if {$arg == "--no-patch"} { set NO_PATCH true }
+}
 
 catch {
   ping_database_server
