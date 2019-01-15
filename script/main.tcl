@@ -227,7 +227,8 @@ proc patch_pyre {} {
 proc generate_json_payload {team_a team_b rite} {
   global RITE_LABEL
 
-  set fp [open "/tmp/payload" w+]
+  set fp [file tempfile tempfile_path]
+  note $tempfile_path
 
   puts $fp "{"
   puts $fp "  \"player_a\": {"
@@ -279,7 +280,7 @@ proc generate_json_payload {team_a team_b rite} {
 
   close $fp
 
-  set fp [open "/tmp/payload" r]
+  set fp [open $tempfile_path r]
   return $fp
 }
 
