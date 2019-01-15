@@ -309,6 +309,8 @@ proc handle_pyre_output {stream} {
   global DATABASE_SERVER
 
   while {[gets $stream line] >= 0} {
+    note "(PYRE) $line"
+
     if [regexp {^RITECLUB} ${line}] {
       set tokens [split $line "|"]
       set beacon [lindex $tokens 0]
