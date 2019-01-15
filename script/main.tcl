@@ -51,7 +51,6 @@ proc warning_dialog {msg} {
 # === MAIN WINDOW SETUP ===
 wm title . ${APP_NAME}
 wm iconphoto . -default pyre_logo
-#wm geometry . "=800x600"
 wm resizable . true true
 
 ttk::label .title_label_img -image pyre_logo
@@ -60,16 +59,13 @@ proc destroy_about_window {} {
   wm forget .about_window
 }
 
-# XXX Can't show this window twice! 
 proc show_about_window {} {
   global APP_NAME
   global VERSION
-  tk_messageBox -type ok -message "${APP_NAME} ${VERSION}\nDeveloped by Charlotte Koch"
+  tk_messageBox -type ok -message "${APP_NAME} ${VERSION}\nDeveloped by dressupgeekout"
 }
 
 # Can return: "macOS", "Windows" or "Linux".
-#
-# XXX verify what [platform::generic] returns on Windows.
 proc my_platform {} {
   set word [lindex [split [platform::generic] -] 0]
 
@@ -190,7 +186,7 @@ proc patch_pyre {} {
 
   set diff_basenames [list \
     MatchScripts           \
-    UIScripts
+    UIScripts              \
   ]
 
   # First a quick sanity check to make sure we actually have the patches we
@@ -217,6 +213,7 @@ proc patch_pyre {} {
 
   # And then we'll actually apply the patches.
   foreach {f} $diff_basenames {
+    note "PATCH $f.lua"
     patch [file join [pyre_scripts_location] "${f}.lua"] [file join $PATCHDIR "patch-Scripts_${f}.lua.diff"]
   }
 
@@ -482,7 +479,7 @@ menu .menubar.xxx -tearoff false
 . configure -menu .menubar
 
 
-# === XXX ===
+# === WIDGETS ===
 ttk::button .button1 -text "About..." -command show_about_window
 
 proc set_pyre_location {} {
