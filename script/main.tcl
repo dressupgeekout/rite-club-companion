@@ -13,6 +13,7 @@ set APP_NAME "Rite Club Companion"
 
 set DATABASE_SERVER "http://noxalas.net:9292"
 set NO_PATCH false
+set FAKE false
 
 set __unset__ "(unset)"
 set __unknown__ "(unknown)"
@@ -119,6 +120,11 @@ proc get_pyre_version {} {
 # really want is the actual executable Mach-O binary.
 proc pyre_real_location {} {
   global PYRE_LOCATION
+  global FAKE
+
+  # The "fake_pyre" app is not a macOS .app bundle, so don't try to look
+  # inside as if it were one.
+  if $FAKE { return $PYRE_LOCATION }
 
   if {[my_platform] == "macOS"} {
     return [file join $PYRE_LOCATION "Contents" "MacOS" "Pyre"]
@@ -538,6 +544,7 @@ note "version ${VERSION}"
 foreach {arg} $argv {
   if {$arg == "--debug"} { set DATABASE_SERVER "http://localhost:9292" }
   if {$arg == "--no-patch"} { set NO_PATCH true }
+  if {$arg == "--fake"} { set FAKE true }
 }
 
 catch {
