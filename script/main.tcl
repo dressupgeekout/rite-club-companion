@@ -283,8 +283,7 @@ proc generate_json_payload {team_a team_b rite} {
 
   close $fp
 
-  set fp [open $tempfile_path r]
-  return $fp
+  return $tempfile_path
 }
 
 # This performs the transformation: "TeamName02" -> 2
@@ -325,12 +324,18 @@ proc handle_pyre_output {stream} {
       if { $directive == "STOP" } {
         # There isn't a readymade 'stringio' class, so its just easier to read/write
         # to/from a file >:|
-        #
-        # XXX This works, just needs to be prettified
-        set fp [generate_json_payload ${team_a} ${team_b} ${rite}]
-        set token [::http::geturl "${DATABASE_SERVER}/api/v1/rites" -method POST -type application/json -querychannel $fp]
+        set payload_path [generate_json_payload ${team_a} ${team_b} ${rite}]
+        set payload_length [file size $payload_path]
+        set fp [open $payload_path r]
+        set token [::http::geturl "${DATABASE_SERVER}/api/v1/rites" \
+          -method POST                                              \
+          -type application/json                                    \
+          -querychannel $fp                                         \
+          -headers [list Content-Length $payload_length]            \
+        ]
         close $fp
         ::http::cleanup $token
+        file delete -force $payload_path
 
         unset team_a
         unset team_b
