@@ -226,64 +226,36 @@ proc patch_pyre {} {
   return true
 }
 
-# XXX require a proper JSON generator
-proc generate_json_payload {team_a team_b rite} {
+proc generate_post_payload {team_a team_b rite} {
   global RITE_LABEL
 
-  set fp [file tempfile tempfile_path]
-  note "Wrting JSON to: $tempfile_path"
-
-  puts $fp "{"
-  puts $fp "  \"player_a\": {"
-  puts $fp "    \"id\": [reader_id_from_username [.reader_a_selection get]],"
-  puts $fp "    \"triumvirate\": [dict get $team_a triumvirate],"
-  puts $fp "    \"input_method\": 1,"
-  puts $fp "    \"pyre_start_health\": [dict get $team_a starthp],"
-  puts $fp "    \"pyre_end_health\": [dict get $team_a endhp],"
-  puts $fp "    \"host\": true,"
-  puts $fp "    \"exiles\": \["
-  puts $fp "      {"
-  puts $fp "        \"character_index\": [lindex [dict get $team_a exiles] 0]"
-  puts $fp "      },"
-  puts $fp "      {"
-  puts $fp "        \"character_index\": [lindex [dict get $team_a exiles] 1]"
-  puts $fp "      },"
-  puts $fp "      {"
-  puts $fp "        \"character_index\": [lindex [dict get $team_a exiles] 2]"
-  puts $fp "      }"
-  puts $fp "    ]"
-  puts $fp "  },"
-  puts $fp "  \"player_b\": {"
-  puts $fp "    \"id\": [reader_id_from_username [.reader_b_selection get]],"
-  puts $fp "    \"triumvirate\": [dict get $team_b triumvirate],"
-  puts $fp "    \"input_method\": 2,"
-  puts $fp "    \"pyre_start_health\": [dict get $team_b starthp],"
-  puts $fp "    \"pyre_end_health\": [dict get $team_b endhp],"
-  puts $fp "    \"host\": false,"
-  puts $fp "    \"exiles\": \["
-  puts $fp "      {"
-  puts $fp "        \"character_index\": [lindex [dict get $team_b exiles] 0]"
-  puts $fp "      },"
-  puts $fp "      {"
-  puts $fp "        \"character_index\": [lindex [dict get $team_b exiles] 1]"
-  puts $fp "      },"
-  puts $fp "      {"
-  puts $fp "        \"character_index\": [lindex [dict get $team_b exiles] 2]"
-  puts $fp "      }"
-  puts $fp "    ]"
-  puts $fp "  },"
-  puts $fp "  \"rite\": {"
-  puts $fp "    \"label\": \"${RITE_LABEL}\","
-  puts $fp "    \"stage\": [dict get $rite stage],"
-  puts $fp "    \"masteries_allowed\": [dict get $rite masteries],"
-  puts $fp "    \"duration\": [dict get $rite duration],"
-  puts $fp "    \"talismans_enabled\": [dict get $rite talismans_enabled]"
-  puts $fp "  }"
-  puts $fp "}"
-
-  close $fp
-
-  return $tempfile_path
+  return [::http::formatQuery                                                             \
+    player_a.id                       [reader_id_from_username [.reader_a_selection get]] \
+    player_a.triumvirate              [dict get $team_a triumvirate]                      \
+    player_a.input_method             1                                                   \
+    player_a.pyre_start_health        [dict get $team_a starthp]                          \
+    player_a.pyre_end_health          [dict get $team_a endhp]                            \
+    player_a.host                     true                                                \
+    player_a.exiles.0.character_index [lindex [dict get $team_a exiles] 0]                \
+    player_a.exiles.1.character_index [lindex [dict get $team_a exiles] 1]                \
+    player_a.exiles.2.character_index [lindex [dict get $team_a exiles] 2]                \
+                                                                                          \
+    player_b.id                       [reader_id_from_username [.reader_b_selection get]] \
+    player_b.triumvirate              [dict get $team_b triumvirate]                      \
+    player_b.input_method             2                                                   \
+    player_b.pyre_start_health        [dict get $team_b starthp]                          \
+    player_b.pyre_end_health          [dict get $team_b endhp]                            \
+    player_b.host                     false                                               \
+    player_b.exiles.0.character_index [lindex [dict get $team_b exiles] 0]                \
+    player_b.exiles.1.character_index [lindex [dict get $team_b exiles] 1]                \
+    player_b.exiles.2.character_index [lindex [dict get $team_b exiles] 2]                \
+                                                                                          \
+    rite.label             ${RITE_LABEL}                                                  \
+    rite.stage             [dict get $rite stage]                                         \
+    rite.masteries_allowed [dict get $rite masteries]                                     \
+    rite.duration          [dict get $rite duration]                                      \
+    rite.talismans_enabled [dict get $rite talismans_enabled]                             \
+  ]
 }
 
 # This performs the transformation: "TeamName02" -> 2
@@ -324,18 +296,9 @@ proc handle_pyre_output {stream} {
       if { $directive == "STOP" } {
         # There isn't a readymade 'stringio' class, so its just easier to read/write
         # to/from a file >:|
-        set payload_path [generate_json_payload ${team_a} ${team_b} ${rite}]
-        set payload_length [file size $payload_path]
-        set fp [open $payload_path r]
-        set token [::http::geturl "${DATABASE_SERVER}/api/v1/rites" \
-          -method POST                                              \
-          -type application/json                                    \
-          -querychannel $fp                                         \
-          -headers [list Content-Length $payload_length]            \
-        ]
-        close $fp
+        set payload [generate_post_payload $team_a $team_b $rite]
+        set token [::http::geturl "${DATABASE_SERVER}/api/v1/rites" -query $payload]
         ::http::cleanup $token
-        file delete -force $payload_path
 
         unset team_a
         unset team_b
