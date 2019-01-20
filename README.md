@@ -6,6 +6,10 @@ The **Rite Club Companion** is a portable GUI application which helps out in
 all sorts of interesting ways pertaining to the Rite Club's (unofficial)
 [Pyre][] tournaments.
 
+Its primary purpose is to modify Pyre in such a way that rites are
+automatically recorded on the official [Rite Club Web][] server,
+[noxalas.net](http://noxalas.net:9292) when rites are completed.
+
 It runs on macOS, Windows and Linux, which are the three platforms on which
 Pyre is officially supported.
 
@@ -68,3 +72,4 @@ $ PATH=/usr/pkg/cross/x86_64-w64-mingw32/bin:${PATH} gmake PLATFORM=win TAR=gtar
 [mingw-w64]: https://mingw-w64.org/doku.php
 [Pyre]: https://www.supergiantgames.com/games/pyre/
 [Tcl/Tk]: http://www.tcl.tk/
+[Rite Club Web]: http://github.com/dressupgeekout/rite-club-web
