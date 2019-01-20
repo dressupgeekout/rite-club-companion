@@ -255,6 +255,7 @@ proc generate_post_payload {team_a team_b rite} {
     rite.masteries_allowed [dict get $rite masteries]                                     \
     rite.duration          [dict get $rite duration]                                      \
     rite.talismans_enabled [dict get $rite talismans_enabled]                             \
+    rite.timestamp         [dict get $rite commence_time]                                 \
   ]
 }
 
