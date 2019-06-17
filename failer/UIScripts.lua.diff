@@ -1,0 +1,57 @@
+--- /Applications/Pyre.app/Contents/MacOS/Content/Scripts/UIScripts.lua	2018-11-23 21:53:44.000000000 -0800
++++ ./UIScripts.lua	2019-06-16 17:58:28.000000000 -0700
+@@ -3650,6 +3650,22 @@
+ 
+ 		SetMenuOptions({ Name = "LocalMPScreen", Properties = { Run = "MarkTooltipDirty" } })
+ 
++		RiteClub = {
++			TeamA = {
++				Name = LocalMPTeamAName,
++				StartingPyreHealth = LocalMPTeamAPyreHealth,
++			},
++			TeamB = {
++				Name = LocalMPTeamBName,
++				StartingPyreHealth = LocalMPTeamBPyreHealth,
++			},
++			Rite = {
++				Stage = matchSite,
++				TalismansEnabled = GetConfigOptionValue({Name="LocalMPUseItems"}),
++				MasteriesAllowed = (characterLevel-1),
++			},
++		}
++		PersistVariable({Name = "RiteClub"})
+ 	end
+ }
+ 
+@@ -3692,6 +3708,7 @@
+ 		ForceShortIntro = true
+ 		SuppressVOResume = true
+ 		PersistVariable({ Name = "ForceShortIntro" })
++		--Saves the teams' picks for restart
+ 		if TeamA.DonePicking and TeamB.DonePicking then
+ 			TeamALastDraftPicks = {}
+ 			PersistVariable({ Name = "TeamALastDraftPicks" })
+@@ -3708,6 +3725,7 @@
+ 			end
+ 			PersistVariable({ Name = "TeamBLastDraftPicks" })
+ 		end
++		
+ 		RequestLocalMPRematch = false
+ 		CleanupMatchSounds()
+ 
+@@ -3715,6 +3733,7 @@
+ 		if GetConfigOptionValue({ Name = "LocalMPMap" }) == "LocalMP_MapRandom" then
+ 			SetupMapRotation()
+ 			mapToLoad = RemoveRandomValue( mapRotation )
++			RiteClub.Rite.Stage = mapToLoad
+ 			if IsEmpty( mapRotation ) then
+ 				mapRotation = nil
+ 			end
+@@ -3748,6 +3767,7 @@
+ 	if mapRequest == "LocalMP_MapRandom" then
+ 		SetupMapRotation()
+ 		mapRequest = RemoveRandomValue( mapRotation )
++		RiteClub.Rite.Stage = mapRequest
+ 		if IsEmpty( mapRotation ) then
+ 			mapRotation = nil
+ 		end

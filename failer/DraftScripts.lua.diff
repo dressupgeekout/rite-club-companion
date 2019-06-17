@@ -1,0 +1,48 @@
+--- /Applications/Pyre.app/Contents/MacOS/Content/Scripts/DraftScripts.lua	2018-11-23 21:52:22.000000000 -0800
++++ ./DraftScripts.lua	2019-06-16 17:58:36.000000000 -0700
+@@ -1456,7 +1456,7 @@
+ 				end
+ 			end
+ 		end
+-	else
++	else --Multiplayer, so maybe something should happen here
+ 		if team == TeamA and TeamALastDraftPicks ~= nil then
+ 			for k, pick in pairs( TeamALastDraftPicks ) do
+ 				local character = team.TeamBench[pick]
+@@ -1844,8 +1844,13 @@
+ 
+ 	if not ForceShortIntro then
+ 		-- Activate everyone
++		-- It lies here somewhere
++		-- This doesn't happen on restart!
++		-- Moved unequip item to the top of the thing, so that the stats reset doesn't take...
++		-- stat-boosting items into account.
+ 		for k, character in pairs( League[playerTeamIndex].TeamBench ) do
+ 			character.RosterStatus = "Active"
++			UnequipUpgradeItem( character, true )
+ 			if simulatedCharacterLevel > 0 then
+ 				character.Level = simulatedCharacterLevel
+ 				character.SkillPoints = character.Level - 1
+@@ -1870,11 +1875,12 @@
+ 					end
+ 				end
+ 			end
+-			UnequipUpgradeItem( character, true )
++			--UnequipUpgradeItem( character, true )
+ 			character.Undraftable = nil
+ 		end
+ 		for k, character in pairs( League[opposingTeamIndex].TeamBench ) do
+ 			character.RosterStatus = "Active"
++			UnequipUpgradeItem( character, true )
+ 			if simulatedCharacterLevel > 0 then
+ 				character.Level = simulatedCharacterLevel
+ 				character.SkillPoints = character.Level - 1
+@@ -1899,7 +1905,7 @@
+ 					end
+ 				end
+ 			end
+-			UnequipUpgradeItem( character, true )
++			--UnequipUpgradeItem( character, true )
+ 			character.Undraftable = nil
+ 		end
+ 

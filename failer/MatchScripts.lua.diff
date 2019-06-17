@@ -1,0 +1,72 @@
+--- /Applications/Pyre.app/Contents/MacOS/Content/Scripts/MatchScripts.lua	2018-11-23 21:58:40.000000000 -0800
++++ ./MatchScripts.lua	2019-06-16 17:58:32.000000000 -0700
+@@ -15,6 +15,7 @@
+ Import "MatchAI"
+ Import "MatchCamera"
+ Import "StarPickScripts"
++Import "RiteClubScripts"
+ 
+ --[[ * PACKAGES * ]]
+ 
+@@ -474,6 +475,36 @@
+ 	if not TeamA.DonePicking or not TeamB.DonePicking then
+ 		CommenceDraft( TeamA, TeamB )
+ 	else
++		-- FV1 Experiment---------------------
++		if GetConfigOptionValue({ Name = "LocalMPCharacterLevel" }) ~= nil and GetConfigOptionValue({ Name = "LocalMPCharacterLevel" }) > 0 then
++		    for k, character in pairs( League[playerTeamIndex].TeamBench ) do
++                if character.FirstName == "Rivals_Nightwing_FirstName" then    
++                    --ResetDefaultAttributes( character, PlayerData.Teams[12].TeamBench[character.CharacterIndex] )
++                    --Nothing needs to happen with Oralech
++                else
++                    ResetArchetypeDefaultAttributes( character )
++                end
++            end
++			for k, character in pairs( League[opposingTeamIndex].TeamBench ) do
++				if character.FirstName == "Rivals_Nightwing_FirstName" then	
++					--ResetDefaultAttributes( character, PlayerData.Teams[12].TeamBench[character.CharacterIndex] )
++					--Nothing needs to happen with Oralech
++				else
++					ResetArchetypeDefaultAttributes( character )
++				end
++				--Titans
++				if ConstellationActive("RivalTeamAttitude") then
++					ModifyAttributeTemporarily( character, "PlayerAttributeRespawn", 8, "RivalTeamAttitude" )
++				end
++				if ConstellationActive("RivalTeamAura") then
++					ModifyAttributeTemporarily( character, "PlayerAttributeAura", 8, "RivalTeamAura" )
++				end
++				if ConstellationActive("RivalTeamSpeed") then
++					ModifyAttributeTemporarily( character, "PlayerAttributeSpeed", 8, "RivalTeamSpeed" )
++				end
++			end
++		end
++		---------------------------------------------------
+ 		CompleteDraft()
+ 	end
+ 
+@@ -2713,6 +2744,9 @@
+ 
+ function CheckKillSkills( killingPlayer, killingWeaponName, deadPlayer, deadPlayerId, perfectKill )
+ 
++	--DebugPrint({Text = RiteClubPretty({killingPlayer, killingWeaponName, deadPlayer, deadPlayerId, perfectKill})})
++	--print("someone died")
++
+ 	if killingPlayer == nil then
+ 		return
+ 	end
+@@ -2725,7 +2759,14 @@
+ 		thread( StaminaRechargeFeedback, killingPlayer.ObjectId )
+ 		--thread( SkillProcFeedback, killingPlayer.ObjectId, "KillsRegenerateStamina" )
+ 	end
++	
++	--FV1 modification here
++	--Previously, Imps could ressurect teammates if they had the KillsRespawnFriends item...
++	--even if they didn't actually hit anyone with their cast!
++	--I'm assuming Imp casts are the only time killingPlayer = deadPlayer
++	if killingPlayer ~= deadPlayer then
+ 	CheckKillsRespawnsFriends( killingPlayer )
++	end
+ 
+ 	if CheckUnitSkillChance( killingPlayer, "AuraKillDetonate" ) and killingPlayer.ObjectId ~= deadPlayerId then
+ 		local resetAuraKill = false
