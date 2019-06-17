@@ -351,6 +351,7 @@ proc handle_pyre_output {stream} {
 
 proc pyre_preflight_checks {} {
   global PYRE_LOCATION
+  global RITE_LABEL
   global __unset__
 
   set reader_a [.reader_a_selection get]
@@ -375,6 +376,11 @@ proc pyre_preflight_checks {} {
 
   if {$reader_a == $reader_b} {
     warning_dialog "${prefix} ${reader_a} cannot compete against themselves!"
+    return false
+  }
+
+  if {$RITE_LABEL == ""} {
+    warning_dialog "${prefix} You need to give this session a label!"
     return false
   }
 
