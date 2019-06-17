@@ -67,6 +67,12 @@ line will look like this if you're building on NetBSD:
 $ PATH=/usr/pkg/cross/x86_64-w64-mingw32/bin:${PATH} gmake PLATFORM=win TAR=gtar all
 ```
 
+
+## License
+
+The Rite Club Companion app's source main source code is licensed under a
+2-clause BSD-style license. See the LICENSE.md file for details.
+
 [![forthebadge](https://forthebadge.com/images/badges/built-by-codebabes.svg)](https://forthebadge.com)
 
 [mingw-w64]: https://mingw-w64.org/doku.php
