@@ -7,10 +7,11 @@ VERSION?=	$(shell cat ./script/VERSION)
 TCL_VERSION?=	8.6.9
 TK_VERSION?=	8.6.9.1
 
-TCL_SOURCE_URL?=	https://prdownloads.sourceforge.net/tcl/tcl$(TCL_VERSION)-src.tar.gz
-TK_SOURCE_URL?=		https://prdownloads.sourceforge.net/tcl/tk$(TK_VERSION)-src.tar.gz
-GNUWIN_PATCH_URL?=	https://sourceforge.net/projects/gnuwin32/files/patch/2.5.9-7/patch-2.5.9-7-bin.zip
-GNU_PATCH_SOURCE_URL?=	https://ftp.gnu.org/gnu/patch/patch-2.7.6.tar.xz
+URL_BASE?=		https://noxalasdotnet.s3-us-west-2.amazonaws.com/riteclubcompanion
+TCL_SOURCE_URL?=	$(URL_BASE)/tcl$(TCL_VERSION)-src.tar.gz
+TK_SOURCE_URL?=		$(URL_BASE)/tk$(TK_VERSION)-src.tar.gz
+GNUWIN_PATCH_URL?=	$(URL_BASE)/patch-2.5.9-7-bin.zip
+GNU_PATCH_SOURCE_URL?=	$(URL_BASE)/patch-2.7.6.tar.xz
 
 distdir:=	dist
 
@@ -181,13 +182,13 @@ $(archive): $(tk_done) $(gpatch_done) $(shell find script -type f) | $(archive_w
 ifeq ($(PLATFORM),win)
 	cp $(tk_workdir)/$(WISH_BIN) $(archive_workdir)/bin
 	cp $(workdir)/$(GPATCH_BIN) $(archive_workdir)/bin
-	echo 'bin\\$(WISH_BIN) script\\main.tcl' > $(archive_workdir)/$(launch_script)
+	echo 'bin\\$(WISH_BIN) script\\patcherapp.tcl' > $(archive_workdir)/$(launch_script)
 	cd $(dir $(archive_workdir)) && zip -r $@ $(notdir $(archive_workdir))
 	mv $(dir $(archive_workdir))/$@ $@
 else
 	echo '#!/bin/sh' > $(archive_workdir)/$(launch_script)
 	echo 'set -ex' >> $(archive_workdir)/$(launch_script)
-	echo './bin/$(WISH_BIN) ./script/main.tcl' >> $(archive_workdir)/$(launch_script)
+	echo './bin/$(WISH_BIN) ./script/patcherapp.tcl' >> $(archive_workdir)/$(launch_script)
 	cp $(gpatch_workdir)/src/patch $(archive_workdir)/bin/$(GPATCH_BIN)
 	chmod +x $(archive_workdir)/$(launch_script)
 	tar -c -f $@ -C $(dir $(archive_workdir)) $(notdir $(archive_workdir))
