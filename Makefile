@@ -42,21 +42,21 @@ GNU_PATCH_DIST=	$(GNU_PATCH_SOURCE_TARBALL)
 GPATCH_BIN=	$(gpatch_bin_basename)
 # XXX WISH_BIN=
 archive=	$(archive_basename)-macosx.tar.gz
-launch_script=	rite_club_companion
+launch_script=	rite_club_patcher
 endif
 ifeq ($(PLATFORM),unix)
 GNU_PATCH_DIST=	$(GNU_PATCH_SOURCE_TARBALL)
 GPATCH_BIN=	$(gpatch_bin_basename)
 # XXX WISH_BIN=
 archive=	$(archive_basename)-linux.tar.gz
-launch_script=	rite_club_companion
+launch_script=	rite_club_patcher
 endif
 ifeq ($(PLATFORM),win)
 GNU_PATCH_DIST=	$(GNUWIN_PATCH_ZIPBALL)
 GPATCH_BIN=	$(gpatch_bin_basename).exe
 WISH_BIN=	wish86s.exe
 archive=	$(archive_basename)-windows.zip
-launch_script=	"Rite Club Companion.bat"
+launch_script=	"Rite Club Patcher.bat"
 endif
 
 workdir:=		work.$(PLATFORM)
