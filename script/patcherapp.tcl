@@ -34,7 +34,7 @@ package require platform
 set HERE [file normalize [file dirname $argv0]]
 set IMG_DIR [file join ${HERE} "img"]
 set PATCHDIR [file join ${HERE} "patch"]
-set APP_NAME "Rite Club Companion - Patcher"
+set APP_NAME "Rite Club Patcher"
 
 set NO_PATCH false
 
@@ -347,9 +347,42 @@ proc unpatch_pyre {} {
 # === WIDGETS ===
 ttk::button .button1 -text "About..." -command show_about_window
 
+# Setting the location of Pyre implies updating the Pyre launcher script, which
+# will be used by the Companion app.
 proc set_pyre_location {} {
+  global HERE
   global PYRE_LOCATION
+
   set PYRE_LOCATION [tk_getOpenFile -parent .]
+
+  if {[my_platform] == "Windows"} {
+    set launcher_script [file join $HERE "launch_pyre.bat"]
+  } else {
+    set launcher_script [file join $HERE "launch_pyre.sh"]
+  }
+
+  set fp [open $launcher_script "w"]
+
+  if {[my_platform] == "Windows"} {
+    # Write a batch script
+    puts $fp "REM AUTOMATICALLY GENERATED, DO NOT EDIT."
+    puts $fp [string cat "cd \"" [file dirname $PYRE_LOCATION] "\""]
+    puts $fp [file tail $PYRE_LOCATION]
+  } else {
+    # Write a shell script
+    puts $fp "#!/bin/sh"
+    puts $fp "# AUTOMATICALLY GENERATED, DO NOT EDIT."
+    puts $fp [string cat "cd " [file dirname $PYRE_LOCATION]]
+    puts $fp [file join "." [file tail $PYRE_LOCATION]]
+  }
+
+  close $fp
+
+  # On Unix, the script needs to be explicitly executable.
+  if {[my_platform] != "Windows"} {
+    file attributes $launcher_script -permissions 0755
+  }
+
   get_pyre_version
 }
 
