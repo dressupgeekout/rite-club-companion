@@ -59,8 +59,14 @@ pushd ${WORKDIR}
   popd
 popd
 
+# Unpack the audio grabber DLL distribution.
+pushd ${WORKDIR}
+  unzip ../dist/virtual-audio-capture-grabber-device-master.zip
+popd
+
 # Put it all in a DESTDIR.
 mkdir -p ${DESTDIR}/bin
+mkdir -p ${DESTDIR}/dll
 
 cp ${WORKDIR}/tk8.6.9/win/wish86s.exe ${DESTDIR}/bin
 rsync -ar ./script ${DESTDIR}
@@ -69,6 +75,7 @@ mkdir -p ${DESTDIR}/library/tk8.6
 rsync -ar ${WORKDIR}/tk8.6.9/library/ ${DESTDIR}/library/tk8.6/
 
 cp ${WORKDIR}/gpatsch.exe ${DESTDIR}/bin
+cp ${WORKDIR}/virtual-audio-capture-grabber-device-master/source_code/x64/Release/audio_sniffer-x64.dll ${DESTDIR}/dll
 
 rsync -ar ${WORKDIR}/love-11.3-win64/ ${DESTDIR}/bin
 rsync -ar ${WORKDIR}/ffmpeg-4.3.1-win64-static/ ${DESTDIR}

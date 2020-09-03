@@ -16,6 +16,7 @@ GNU_PATCH_SOURCE_URL?=	$(URL_BASE)/patch-2.7.6.tar.xz
 LOVE_WINDOWS_URL?=	$(URL_BASE)/love-11.3-win64.zip
 RUBY_WINDOWS_URL?=	$(URL_BASE)/rubyinstaller-2.6.6-1-x64.7z
 FFMPEG_WINDOWS_URL?=	$(URL_BASE)/ffmpeg-4.3.1-win64-static.zip
+RDP_AUDIO_GRABBER_URL?=	$(URL_BASE)/virtual-audio-capture-grabber-device-master.zip
 
 distdir:=	dist
 
@@ -28,6 +29,7 @@ ifeq ($(PLATFORM),win)
 LOVE_ZIPBALL=			$(distdir)/$(notdir $(LOVE_WINDOWS_URL))
 RUBY_ZIPBALL=			$(distdir)/$(notdir $(RUBY_WINDOWS_URL))
 FFMPEG_ZIPBALL=			$(distdir)/$(notdir $(FFMPEG_WINDOWS_URL))
+RDP_AUDIO_GRABBER_ZIPBALL=	$(distdir)/$(notdir $(RDP_AUDIO_GRABBER_URL))
 endif
 
 MINGW_TRIPLE?=	x86_64-w64-mingw32
@@ -44,28 +46,24 @@ PLATFORM?=	unix
 endif # ifeq uname Darwin
 endif # ifndef PLATFORM
 
-archive_basename=	rite_club_companion-$(VERSION)
 gpatch_bin_basename=	gpatsch
 
 ifeq ($(PLATFORM),macosx)
 GNU_PATCH_DIST=	$(GNU_PATCH_SOURCE_TARBALL)
 GPATCH_BIN=	$(gpatch_bin_basename)
 # XXX WISH_BIN=
-archive=	$(archive_basename)-macosx.tar.gz
 launch_script=	rite_club_patcher
 endif
 ifeq ($(PLATFORM),unix)
 GNU_PATCH_DIST=	$(GNU_PATCH_SOURCE_TARBALL)
 GPATCH_BIN=	$(gpatch_bin_basename)
 # XXX WISH_BIN=
-archive=	$(archive_basename)-linux.tar.gz
 launch_script=	rite_club_patcher
 endif
 ifeq ($(PLATFORM),win)
 GNU_PATCH_DIST=	$(GNUWIN_PATCH_ZIPBALL)
 GPATCH_BIN=	$(gpatch_bin_basename).exe
 WISH_BIN=	wish86s.exe
-archive=	$(archive_basename)-windows.zip
 launch_script=	"Rite Club Patcher.bat"
 endif
 
@@ -74,7 +72,6 @@ tcl_workdir:=		$(workdir)/tcl$(TCL_VERSION)/$(PLATFORM)
 # XXX bleh vv
 tk_workdir:=		$(workdir)/tk$(TCL_VERSION)/$(PLATFORM)
 gpatch_workdir:=	$(workdir)/$(subst .tar.xz,,$(notdir $(GNU_PATCH_SOURCE_URL)))
-archive_workdir:=	$(workdir)/$(archive_basename)
 
 tcl_configure_flags=	# defined
 tcl_configure_flags+=	--disable-shared
@@ -112,20 +109,20 @@ help:
 	@echo - tcl PLATFORM=macosx\|unix\|win
 	@echo - tk PLATFORM=macosx\|unix\|win
 	@echo - gpatch PLATFORM=macosx\|unix\|win
-	@echo - archive PLATFORM=macosx\|unix\|win
 	@echo - clean PLATFORM=macosx\|unix\|win
 
 .PHONY: all
-all: $(archive)
+all: help
 
 .PHONY: fetch
-fetch:				\
-	$(TCL_SOURCE_TARBALL)	\
-	$(TK_SOURCE_TARBALL)	\
-	$(GNU_PATCH_DIST)	\
-	$(LOVE_ZIPBALL)		\
-	$(RUBY_ZIPBALL)		\
-	$(FFMPEG_ZIPBALL)
+fetch:					\
+	$(TCL_SOURCE_TARBALL)		\
+	$(TK_SOURCE_TARBALL)		\
+	$(GNU_PATCH_DIST)		\
+	$(LOVE_ZIPBALL)			\
+	$(RUBY_ZIPBALL)			\
+	$(FFMPEG_ZIPBALL)		\
+	$(RDP_AUDIO_GRABBER_ZIPBALL)
 
 $(TCL_SOURCE_TARBALL): | $(distdir)
 	curl -L $(TCL_SOURCE_URL) > $@
@@ -160,6 +157,11 @@ $(RUBY_ZIPBALL): | $(distdir)
 $(FFMPEG_ZIPBALL): | $(distdir)
 	curl -L $(FFMPEG_WINDOWS_URL) > $@
 	cd $(distdir) && shasum -a256 -c ffmpeg-win64.shasum
+	@touch $@
+
+$(RDP_AUDIO_GRABBER_ZIPBALL): | $(distdir)
+	curl -L $(RDP_AUDIO_GRABBER_URL) > $@
+	cd $(distdir) && shasum -a256 -c rdp-audio-grabber.shasum
 	@touch $@
 
 .PHONY: tcl
@@ -202,29 +204,6 @@ else
 endif
 	@touch $@
 
-.PHONY: archive
-archive: $(archive)
-
-$(archive): $(tk_done) $(gpatch_done) $(shell find script -type f) | $(archive_workdir)
-	mkdir -p $(archive_workdir)/bin
-	cp -r $(CURDIR)/script $(archive_workdir)
-	cp -r $(tcl_workdir)/../library $(archive_workdir)
-	cp -r $(tk_workdir)/../library $(archive_workdir)/library/tk8.6
-ifeq ($(PLATFORM),win)
-	cp $(tk_workdir)/$(WISH_BIN) $(archive_workdir)/bin
-	cp $(workdir)/$(GPATCH_BIN) $(archive_workdir)/bin
-	echo 'bin\\$(WISH_BIN) script\\patcherapp.tcl' > $(archive_workdir)/$(launch_script)
-	cd $(dir $(archive_workdir)) && zip -r $@ $(notdir $(archive_workdir))
-	mv $(dir $(archive_workdir))/$@ $@
-else
-	echo '#!/bin/sh' > $(archive_workdir)/$(launch_script)
-	echo 'set -ex' >> $(archive_workdir)/$(launch_script)
-	echo './bin/$(WISH_BIN) ./script/patcherapp.tcl' >> $(archive_workdir)/$(launch_script)
-	cp $(gpatch_workdir)/src/patch $(archive_workdir)/bin/$(GPATCH_BIN)
-	chmod +x $(archive_workdir)/$(launch_script)
-	tar -c -f $@ -C $(dir $(archive_workdir)) $(notdir $(archive_workdir))
-endif
-
 .PHONY: clean
 clean:
 	rm -rf $(workdir) $(tcl_done) $(tk_done) $(gpatch_done)
@@ -234,6 +213,4 @@ clean:
 $(distdir):
 	mkdir -p $@
 $(workdir):
-	mkdir -p $@
-$(archive_workdir):
 	mkdir -p $@
