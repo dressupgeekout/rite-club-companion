@@ -61,6 +61,14 @@ function SecondsToPrettyTimeFrac(sec)
 	return string.format("%02d:%02d.%02d", mins, sec, leftover)
 end
 
+--[[XXX assume a rite cannot be >= 1 hr because i'm lazy]]
+function SecondsToPrettyTimeSRT(sec)
+	local mins = math.floor(sec / 60)
+	local sec = sec - (60 * mins)
+	local leftover = (sec - math.floor(sec)) * 1000
+	return string.format("00:%02d:%02d,%02d", mins, sec, leftover)
+end
+
 function LaunchPyre()
 	if PyreEngaged then
 		print("WARNING: Pyre is already engaged!")
@@ -184,6 +192,7 @@ function AnalyzeMessage(msg)
 			love.thread.getChannel("TOVIDEORECORDER"):push({"KILL_RECORDING", PyreRecorderPID})
 			CurrentlyRecording = false
 			print(">> VIDEO RECORDING HAS ENDED")
+			GenerateSubtitles()
 		end
 		PostMortem()
 	end
@@ -300,6 +309,22 @@ function ToggleSection()
 	else
 		CurrentSection = SECTION_CHRONO
 	end
+end
+
+--[[Writes a file in the SRT format.]]
+function GenerateSubtitles()
+	local path = "/tmp/subtitles.srt"
+	local f = io.open(path, "w")
+	for i, event in pairs(RiteInfo.Chrono) do
+		f:write(string.format("%d\n", i))
+		local from = SecondsToPrettyTimeSRT(event.Time)
+		local to = SecondsToPrettyTimeSRT(event.Time+1)
+		f:write(string.format("%s --> %s\n", from, to))
+		f:write(string.format("%s\n", serpent.line(event))) --XXX
+		f:write("\n")
+	end
+	f:close()
+	print(string.format("(SUBTITLES) wrote %s", path))
 end
 
 ---------- ---------- ----------
