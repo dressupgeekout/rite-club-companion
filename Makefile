@@ -13,12 +13,22 @@ TK_SOURCE_URL?=		$(URL_BASE)/tk$(TK_VERSION)-src.tar.gz
 GNUWIN_PATCH_URL?=	$(URL_BASE)/patch-2.5.9-7-bin.zip
 GNU_PATCH_SOURCE_URL?=	$(URL_BASE)/patch-2.7.6.tar.xz
 
+LOVE_WINDOWS_URL?=	$(URL_BASE)/love-11.3-win64.zip
+RUBY_WINDOWS_URL?=	$(URL_BASE)/rubyinstaller-2.6.6-1-x64.7z
+FFMPEG_WINDOWS_URL?=	$(URL_BASE)/ffmpeg-4.3.1-win64-static.zip
+
 distdir:=	dist
 
 TCL_SOURCE_TARBALL=		$(distdir)/$(notdir $(TCL_SOURCE_URL))
 TK_SOURCE_TARBALL=		$(distdir)/$(notdir $(TK_SOURCE_URL))
 GNU_PATCH_SOURCE_TARBALL=	$(distdir)/$(notdir $(GNU_PATCH_SOURCE_URL))
 GNUWIN_PATCH_ZIPBALL=		$(distdir)/$(notdir $(GNUWIN_PATCH_URL))
+
+ifeq ($(PLATFORM),win)
+LOVE_ZIPBALL=			$(distdir)/$(notdir $(LOVE_WINDOWS_URL))
+RUBY_ZIPBALL=			$(distdir)/$(notdir $(RUBY_WINDOWS_URL))
+FFMPEG_ZIPBALL=			$(distdir)/$(notdir $(FFMPEG_WINDOWS_URL))
+endif
 
 MINGW_TRIPLE?=	x86_64-w64-mingw32
 
@@ -109,7 +119,13 @@ help:
 all: $(archive)
 
 .PHONY: fetch
-fetch: $(TCL_SOURCE_TARBALL) $(TK_SOURCE_TARBALL) $(GNU_PATCH_DIST)
+fetch:				\
+	$(TCL_SOURCE_TARBALL)	\
+	$(TK_SOURCE_TARBALL)	\
+	$(GNU_PATCH_DIST)	\
+	$(LOVE_ZIPBALL)		\
+	$(RUBY_ZIPBALL)		\
+	$(FFMPEG_ZIPBALL)
 
 $(TCL_SOURCE_TARBALL): | $(distdir)
 	curl -L $(TCL_SOURCE_URL) > $@
@@ -129,6 +145,21 @@ $(GNU_PATCH_SOURCE_TARBALL): | $(distdir)
 $(GNUWIN_PATCH_ZIPBALL): | $(distdir)
 	curl -L $(GNUWIN_PATCH_URL) > $@
 	cd $(distdir) && shasum -a256 -c gnuwinpatch.shasum
+	@touch $@
+
+$(LOVE_ZIPBALL): | $(distdir)
+	curl -L $(LOVE_WINDOWS_URL) > $@
+	cd $(distdir) && shasum -a256 -c love-win64.shasum
+	@touch $@
+
+$(RUBY_ZIPBALL): | $(distdir)
+	curl -L $(RUBY_WINDOWS_URL) > $@
+	cd $(distdir) && shasum -a256 -c ruby-win64.shasum
+	@touch $@
+
+$(FFMPEG_ZIPBALL): | $(distdir)
+	curl -L $(FFMPEG_WINDOWS_URL) > $@
+	cd $(distdir) && shasum -a256 -c ffmpeg-win64.shasum
 	@touch $@
 
 .PHONY: tcl

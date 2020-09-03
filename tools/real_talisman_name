@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+
+require 'nokogiri'
+
+help_text_file = ARGV.shift
+
+if not help_text_file
+  $stderr.puts("expected a path to HelpText.en.xml")
+  exit 1
+end
+
+xml = Nokogiri(File.read(help_text_file))
+
+xml.xpath('//HelpText//Text').each do |node|
+  id = node["Id"]
+  displayname = node["DisplayName"]
+
+  reject = [
+    /^Fuel_Swath/,
+    /^Info/,
+    /^Junk_Swath/,
+    /^Permanent/,
+    /^Respec/,
+    /^Roster/,
+    /^SeaItem/,
+    /^SkillPowerItem/, # Don't care about stardust
+    /^StatChange/,
+    /^Temporary/,
+  ]
+
+  if id =~ /Item(\d+)?$/ && reject.all? { |regex| id !~ regex }
+    puts "#{id} = #{displayname}"
+  end
+end

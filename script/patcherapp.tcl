@@ -356,9 +356,9 @@ proc set_pyre_location {} {
   set PYRE_LOCATION [tk_getOpenFile -parent .]
 
   if {[my_platform] == "Windows"} {
-    set launcher_script [file join $HERE "launch_pyre.bat"]
+    set launcher_script [file join $HERE ".." "bin" "launch_pyre.bat"]
   } else {
-    set launcher_script [file join $HERE "launch_pyre.sh"]
+    set launcher_script [file join $HERE ".." "bin" "launch_pyre.sh"]
   }
 
   set fp [open $launcher_script "w"]
