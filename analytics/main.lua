@@ -28,7 +28,8 @@ EVENT_FONT = love.graphics.newFont("fonts/Alegreya-Regular.otf", 24)
 if love.system.getOS() == "Windows" then
 	PYRE_PATH = "launch_pyre.bat"
 else
-	PYRE_PATH = "launch_pyre.sh"
+	--PYRE_PATH = "launch_pyre.sh"
+	PYRE_PATH = "/Users/charlotte/Applications/Pyre.app"
 end
 
 CONFIG_FILE = "RiteClubConfig.lua"
@@ -320,7 +321,24 @@ function GenerateSubtitles()
 		local from = SecondsToPrettyTimeSRT(event.Time)
 		local to = SecondsToPrettyTimeSRT(event.Time+1)
 		f:write(string.format("%s --> %s\n", from, to))
-		f:write(string.format("%s\n", serpent.line(event))) --XXX
+
+		local msg
+
+		if event.Type == "BANISHMENT" then
+			msg = string.format(
+				"%s (%s) BANISHES %s (%s)",
+				event.Banisher.Name, RiteInfo[event.BanisherTeam].Triumvirate.Name,
+				event.Banishee.Name, RiteInfo[event.BanisheeTeam].Triumvirate.Name
+			)
+		elseif event.Type == "SCORE" then
+			local verb
+			if event.Thrown then verb = "THROWS" else verb = "PLUNGES" end
+			msg = string.format("%s (%s) %s FOR %d DAMAGE", event.Exile.Name, "team?", verb, event.Value)
+		else
+			msg = "(EVENT)"
+		end
+
+		f:write(msg.."\n")
 		f:write("\n")
 	end
 	f:close()

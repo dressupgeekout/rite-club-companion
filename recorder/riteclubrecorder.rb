@@ -21,9 +21,6 @@ require 'optparse'
 require 'rubygems'
 require 'socket'
 
-$stdout.sync = true
-$stderr.sync = true
-
 class App
   attr_accessor :ffmpeg
   attr_accessor :quiet
@@ -42,6 +39,11 @@ class App
     @ffmpeg = kwargs[:ffmpeg] || DEFAULT_FFMPEG
     @screen_no = kwargs[:screen_no] || 1
     @outdir = kwargs[:outdir] || Dir.pwd
+
+    if self.windows?
+      $stdout.sync = true
+      $stderr.sync = true
+    end
   end
 
   def windows?
